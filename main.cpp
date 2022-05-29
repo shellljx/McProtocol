@@ -64,6 +64,7 @@ std::unique_ptr<McProtocol::ByteData> decomp(McProtocol::DecodeStream *stream, i
   if (ret != Z_OK) {
     throw std::runtime_error("zlib init failed");
   }
+
   unsigned char input[stream->bytesAvailable()];
   uint32_t avaliable = stream->bytesAvailable();
   memcpy(input, stream->readBytes(avaliable).data(), avaliable);
@@ -154,6 +155,21 @@ void ReadThread() {
     McProtocol::DecodeStream decode_stream(byteData->data(), byteData->length());
     while (decode_stream.bytesAvailable() > 0) {
       auto oldPosition = decode_stream.position();
+      //check validate varint
+      bool notVarint = false;
+      for (int i = 0; i < 5; ++i) {
+        if (decode_stream.bytesAvailable()==0){
+          notVarint = true;
+          break;
+        }
+        if(decode_stream.readInt8()>=0){
+          break;
+        }
+      }
+      decode_stream.setPosition(oldPosition);
+      if (notVarint){
+        break;
+      }
       auto packetLength = decode_stream.readVerInt();
       if (packetLength > 0 && packetLength <= decode_stream.bytesAvailable()) {
         auto packetStream = decode_stream.readBytes(packetLength);
@@ -165,6 +181,7 @@ void ReadThread() {
             createClientBoundPacket(&packetStream);
           } else {
             auto decompPacketData = decomp(&packetStream, dataLength);
+            //todo nullpt
             auto decodePacketSream = McProtocol::DecodeStream(decompPacketData->data(), decompPacketData->length());
             createClientBoundPacket(&decodePacketSream);
           }
