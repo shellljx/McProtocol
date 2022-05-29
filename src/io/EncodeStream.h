@@ -70,7 +70,7 @@ class EncodeStream final {
  private:
   void ensureCapacity(uint32_t length) {
     if (length > capacity_) {
-      expandCapacity(capacity_);
+      expandCapacity(length);
     }
   }
 
