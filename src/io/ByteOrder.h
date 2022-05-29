@@ -25,5 +25,12 @@ union Bit16 {
   int16_t intValue;
   uint16_t uintValue;
 };
+
+union Bit64 {
+  uint8_t bytes[8];
+  int64_t intValue;
+  uint64_t uintValue;
+  double doubleValue;
+};
 }
 

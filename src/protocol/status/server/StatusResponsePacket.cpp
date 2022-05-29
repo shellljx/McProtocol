@@ -16,6 +16,6 @@ void StatusResponsePacket::write(EncodeStream *stream) {
 }
 
 void StatusResponsePacket::read(DecodeStream *stream) {
-
+  info = stream->readUTF8String();
 }
 }

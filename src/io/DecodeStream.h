@@ -21,7 +21,7 @@ class DecodeStream final {
     return length_ - position_;
   }
 
-  const uint8_t * data() const{
+  const uint8_t *data() const {
     return bytes_;
   }
 
@@ -29,7 +29,7 @@ class DecodeStream final {
     return length_;
   }
 
-  uint32_t position() const{
+  uint32_t position() const {
     return position_;
   }
 
@@ -49,6 +49,18 @@ class DecodeStream final {
     return readBit8().intValue;
   }
 
+  int64_t readInt64() {
+    return readBit64().intValue;
+  }
+
+  uint64_t readUint64() {
+    return readBit64().uintValue;
+  }
+
+  double readDouble() {
+    return readBit64().doubleValue;
+  }
+
   int readVerInt();
 
   std::string readUTF8String();
@@ -62,6 +74,7 @@ class DecodeStream final {
 
  private:
   Bit8 readBit8();
+  Bit64 readBit64();
 
  private:
   const uint8_t *bytes_ = nullptr;

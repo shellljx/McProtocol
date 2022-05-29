@@ -30,7 +30,7 @@ add_executable(socket
         src/codec/PacketCodec.h
         src/codec/aese/AESEncrypter.h
         src/codec/aese/AESEncrypter.cpp
-        src/protocol/PacketFactory.cpp src/protocol/PacketFactory.h)
+        src/protocol/PacketFactory.cpp src/protocol/PacketFactory.h src/protocol/status/client/StatusPingPacket.cpp src/protocol/status/client/StatusPingPacket.h src/protocol/status/server/StatusPongPacket.cpp src/protocol/status/server/StatusPongPacket.h src/protocol/login/client/LoginStartPacket.cpp src/protocol/login/client/LoginStartPacket.h src/protocol/login/server/LoginSuccess.cpp src/protocol/login/server/LoginSuccess.h src/protocol/login/server/SetCompressionPacket.cpp src/protocol/login/server/SetCompressionPacket.h)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/openssl.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/zlib.cmake")

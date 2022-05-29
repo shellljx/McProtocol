@@ -3,9 +3,27 @@
 //
 
 #pragma once
+#include "Packet.h"
 
 namespace McProtocol {
+enum class ProtocolStatus { NONE, HANDSHAKE ,STATUS, LOGIN };
 class PacketFactory {
+ public:
+  explicit PacketFactory();
+  ~PacketFactory();
 
+  std::unique_ptr<Packet> createServerBoundPacket(int id);
+  std::unique_ptr<Packet> createClientBoundPacket(int id);
+
+  void setProtocolStatus(ProtocolStatus status) {
+    status_ = status;
+  }
+
+  ProtocolStatus getProtocolStatus() {
+    return status_;
+  }
+
+ private:
+  ProtocolStatus status_ = ProtocolStatus::NONE;
 };
 }

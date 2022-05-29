@@ -16,7 +16,7 @@ class EncryptionCodec {
   EncryptionCodec();
   ~EncryptionCodec();
 
-  void encode(const EncodeStream *in, const EncodeStream **out);
+  void encode(const unsigned char *in, int length, unsigned char *out, int &outLength);
 
   void decode(const unsigned  char* in, int length, unsigned char* out, int& outLength);
 

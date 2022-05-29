@@ -51,6 +51,12 @@ class EncodeStream final {
 
   void writeUInt16(uint16_t value);
 
+  void writeInt64(int64_t value);
+
+  void writeUInt64(uint64_t value);
+
+  void writeDouble(double value);
+
   void writeVarInt(int value);
   void writeUTF8String(const std::string &text);
 
@@ -77,6 +83,7 @@ class EncodeStream final {
   void expandCapacity(uint32_t length);
   void writeBit8(Bit8 data);
   void writeBit16(Bit16 data);
+  void writeBit64(Bit64 data);
 
  private:
   ByteOrder order_ = ByteOrder::LittleEndian;

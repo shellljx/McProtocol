@@ -15,9 +15,9 @@ class HandshakePacket : public Packet{
   void write(EncodeStream* stream);
 
  private:
-  int protocolVersion_ = 758;
+  int protocolVersion_ = 756;
   std::string serverAddr_ = "127.0.0.1";
   int16_t serverPort = 25565;
-  int intent = 1;
+  int intent = 2;
 };
 }

@@ -25,13 +25,17 @@ EncryptionCodec::~EncryptionCodec() {
   }
 }
 
-void EncryptionCodec::encode(const EncodeStream *in, const EncodeStream **out) {
-
+void EncryptionCodec::encode(const unsigned char *in, int length, unsigned char *out, int &outLength) {
+  if (encryption_context == nullptr) {
+    throw std::runtime_error("encode openssl was not init");
+  }
+  out = new unsigned char[length + blocksize];
+  EVP_EncryptUpdate(encryption_context, out, &outLength, in, length);
 }
 
 void EncryptionCodec::decode(const unsigned char *in, int length, unsigned char *out, int &outLength) {
   if (decryption_context == nullptr) {
-    throw std::runtime_error("openssl was not init");
+    throw std::runtime_error("decode openssl was not init");
   }
 
   out = new unsigned char[length + blocksize];

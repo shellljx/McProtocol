@@ -87,6 +87,24 @@ void EncodeStream::writeUInt16(uint16_t value) {
   writeBit16(data);
 }
 
+void EncodeStream::writeInt64(int64_t value) {
+  Bit64 data = {};
+  data.intValue = value;
+  writeBit64(data);
+}
+
+void EncodeStream::writeUInt64(uint64_t value) {
+  Bit64 data = {};
+  data.uintValue = value;
+  writeBit64(data);
+}
+
+void EncodeStream::writeDouble(double value) {
+  Bit64 data = {};
+  data.doubleValue = value;
+  writeBit64(data);
+}
+
 void EncodeStream::writeVarInt(int value) {
   unsigned int uValue = value;
   while (true) {
@@ -137,6 +155,20 @@ void EncodeStream::writeBit16(Bit16 data) {
   } else {
     bytes_[position_++] = data.bytes[1];
     bytes_[position_++] = data.bytes[0];
+  }
+  positionChanged();
+}
+
+void EncodeStream::writeBit64(Bit64 data) {
+  ensureCapacity(position_ + 8);
+  if (order_ == NATIVE_BYTE_ORDER) {
+    for (int i = 0; i < 8; i++) {
+      bytes_[position_++] = data.bytes[i];
+    }
+  } else {
+    for (int i = 7; i >= 0; i--) {
+      bytes_[position_++] = data.bytes[i];
+    }
   }
   positionChanged();
 }

@@ -16,36 +16,40 @@
 #include "src/protocol/handshake/HandshakePacket.h"
 #include "src/protocol/status/client/StatusRequestPacket.h"
 #include "src/protocol/status/server/StatusResponsePacket.h"
+#include "src/protocol/status/client/StatusPingPacket.h"
+#include "src/protocol/status/server/StatusPongPacket.h"
+#include "src/protocol/login/server/LoginSuccess.h"
+#include "src/protocol/login/server/SetCompressionPacket.h"
 #include "src/codec/EncryptionCodec.h"
+#include "src/protocol/PacketFactory.h"
 
 int client_socket;
 
-std::queue<McProtocol::Packet *> packets_to_send;
+std::queue<std::unique_ptr<McProtocol::Packet>> packets_to_send;
 std::mutex mutex_send;
 std::condition_variable send_condition;
+
+std::queue<std::unique_ptr<McProtocol::Packet>> packets_to_process;
+std::mutex mutex_process;
+std::condition_variable process_condition;
 
 bool enableEncryption = false;
 McProtocol::EncryptionCodec encryptionCodec;
 bool enableCompression = false;
+int compressionThreshold;
 
-static void resize() {
+McProtocol::PacketFactory packetFactory;
 
-}
-
-void processPacket(McProtocol::Packet *packet) {
-
-}
-
-static void onConnected() {
+void sendPacket(std::unique_ptr<McProtocol::Packet> packet) {
+  if (packet == nullptr) {
+    return;
+  }
   std::unique_lock<std::mutex> lock(mutex_send);
-  packets_to_send.push(new McProtocol::HandshakePacket());
-  packets_to_send.push(new McProtocol::StatusRequestPacket());
+  packets_to_send.push(std::move(packet));
   send_condition.notify_all();
 }
 
-std::unique_ptr<McProtocol::ByteData> decomp(McProtocol::DecodeStream *stream) {
-  auto dataLength = stream->readVerInt();
-
+std::unique_ptr<McProtocol::ByteData> decomp(McProtocol::DecodeStream *stream, int outSize) {
   int ret;
   int chunk = 1024 * 6;
   unsigned have;
@@ -66,7 +70,7 @@ std::unique_ptr<McProtocol::ByteData> decomp(McProtocol::DecodeStream *stream) {
   strm.avail_in = stream->bytesAvailable();
   strm.next_in = input;
   unsigned char output[chunk];
-  McProtocol::EncodeStream outStream(dataLength);
+  McProtocol::EncodeStream outStream(outSize);
   do {
     strm.avail_out = chunk;
     strm.next_out = output;
@@ -87,8 +91,23 @@ std::unique_ptr<McProtocol::ByteData> decomp(McProtocol::DecodeStream *stream) {
   return outStream.release();
 }
 
-McProtocol::Packet *createPacket(const McProtocol::DecodeStream *stream) {
-  return new McProtocol::StatusResponsePacket();
+void createClientBoundPacket(McProtocol::DecodeStream *stream) {
+  int packetid = stream->readVerInt();
+  auto packet = packetFactory.createClientBoundPacket(packetid);
+  if (packet == nullptr){
+    return;
+  }
+  packet->read(stream);
+
+  if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::LOGIN && packetid == 3){
+    auto p = reinterpret_cast<McProtocol::SetCompressionPacket*>(packet.get());
+    enableCompression = true;
+    compressionThreshold = p->getCompressionThreshold();
+  }
+
+  std::unique_lock<std::mutex> lock(mutex_process);
+  packets_to_process.push(std::move(packet));
+  process_condition.notify_all();
 }
 
 void ReadThread() {
@@ -99,16 +118,23 @@ void ReadThread() {
   server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
   server_addr.sin_port = htons(25565);
   auto ret = connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr));
+  if (ret != 0) {
+    throw std::runtime_error("connect error");
+  }
   printf("connected %d", ret);
-  onConnected();
+
+  packetFactory.setProtocolStatus(McProtocol::ProtocolStatus::HANDSHAKE);
+  sendPacket(packetFactory.createServerBoundPacket(0x00));
+  packetFactory.setProtocolStatus(McProtocol::ProtocolStatus::LOGIN);
+  sendPacket(packetFactory.createServerBoundPacket(0x00));
 
   McProtocol::EncodeStream encodeStream(256);
   while (true) {
     auto buffer = new unsigned char[256];
     int length = read(client_socket, buffer, sizeof(buffer));
-    std::cout << "receive" << length << std::endl;
+    std::cout << "receive " << encodeStream.length() << std::endl;
     if (length == 0) {
-       close(client_socket);
+      close(client_socket);
       return;
     }
 
@@ -120,24 +146,33 @@ void ReadThread() {
       encodeStream.writeBytes(out, outLength);
     } else {
       encodeStream.writeBytes(buffer, length);
+      delete[] buffer;
     }
 
     auto byteData = encodeStream.release();
 
     McProtocol::DecodeStream decode_stream(byteData->data(), byteData->length());
     while (decode_stream.bytesAvailable() > 0) {
+      auto oldPosition = decode_stream.position();
       auto packetLength = decode_stream.readVerInt();
       if (packetLength > 0 && packetLength <= decode_stream.bytesAvailable()) {
         auto packetStream = decode_stream.readBytes(packetLength);
 
-        int packetid = packetStream.readVerInt();
-        std::string info = packetStream.readUTF8String();
-        printf("");
-        //auto packet = createPacket(&packetStream);
-        //packet->read(&packetStream);
-        //processPacket(packet);
+        if (enableCompression) {
+          auto dataLength = packetStream.readVerInt();
+          if (dataLength <= 0) {
+            //datalength is zero without compression
+            createClientBoundPacket(&packetStream);
+          } else {
+            auto decompPacketData = decomp(&packetStream, dataLength);
+            auto decodePacketSream = McProtocol::DecodeStream(decompPacketData->data(), decompPacketData->length());
+            createClientBoundPacket(&decodePacketSream);
+          }
+        } else {
+          createClientBoundPacket(&packetStream);
+        }
       } else {
-        decode_stream.setPosition(0);
+        decode_stream.setPosition(oldPosition);
         break;
       }
     }
@@ -151,29 +186,122 @@ void ReadThread() {
   }
 }
 
+std::unique_ptr<McProtocol::ByteData> compression(McProtocol::DecodeStream *in) {
+  int ret;
+  int chunk = 1024 * 6;
+  unsigned have;
+  z_stream strm;
+
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
+  if (ret != Z_OK) {
+    throw std::runtime_error("deflate init error");
+  }
+  unsigned char input[in->bytesAvailable()];
+  memcpy(input, in->data(), in->bytesAvailable());
+  unsigned char output[chunk];
+  McProtocol::EncodeStream outStream;
+
+  strm.avail_in = in->bytesAvailable();
+  strm.next_in = input;
+  do {
+    strm.avail_out = chunk;
+    strm.next_out = output;
+    ret = deflate(&strm, Z_FINISH);
+    assert(ret != Z_STREAM_ERROR);
+    have = chunk - strm.avail_out;
+    outStream.writeBytes(output, have);
+  } while (strm.avail_out == 0);
+  deflateEnd(&strm);
+  return outStream.release();
+}
+
 void SendThread() {
   while (true) {
     std::unique_lock<std::mutex> lock(mutex_send);
     while (packets_to_send.empty()) {
       send_condition.wait(lock);
     }
-    auto packet = packets_to_send.front();
+    auto packet = std::move(packets_to_send.front());
     packets_to_send.pop();
+    lock.unlock();
 
     McProtocol::EncodeStream stream;
+    //write packet and length
     stream.writeVarInt(packet->getPacketId());
     packet->write(&stream);
     auto byteData = stream.release();
+
+    //compression
+    if (enableCompression) {
+      if (byteData->length() < compressionThreshold) {
+        stream.writeVarInt(0);
+        stream.writeByteData(byteData.get());
+      } else {
+        stream.writeVarInt(byteData->length());
+        McProtocol::DecodeStream stream1(byteData->data(), byteData->length());
+        auto compressByteDat = compression(&stream1);
+        stream.writeByteData(compressByteDat.get());
+      }
+      byteData = stream.release();
+    }
+
+    //sizer
     stream.writeVarInt(byteData->length());
     stream.writeByteData(byteData.get());
-    auto byte2 = stream.release();
-    write(client_socket, byte2->data(), byte2->length());
+    byteData = stream.release();
+
+    //encryption
+    if (enableEncryption) {
+      unsigned char *out = nullptr;
+      int outLength = 0;
+      encryptionCodec.encode(byteData->data(), byteData->length(), out, outLength);
+      byteData = McProtocol::ByteData::MakeCopy(out, outLength);
+    }
+
+    write(client_socket, byteData->data(), byteData->length());
     std::cout << "packet send" << std::endl;
+    if (packets_to_send.size() == 100000) {
+      break;
+    }
   }
 }
 
 void PackageThread() {
+  while (true) {
+    std::unique_lock<std::mutex> lock(mutex_process);
+    while (packets_to_process.empty()) {
+      process_condition.wait(lock);
+    }
+    auto packet = std::move(packets_to_process.front());
+    packets_to_process.pop();
+    lock.unlock();
+    //process
+    if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::STATUS) {
+      if (packet->getPacketId() == 0x00) {
+        auto p = reinterpret_cast<McProtocol::StatusResponsePacket *>(packet.get());
+        std::cout << p->getInfo() << std::endl;
+        auto ping = packetFactory.createServerBoundPacket(0x01);
+        reinterpret_cast<McProtocol::StatusPingPacket *>(ping.get())->setPayload(12345678910);
+        sendPacket(std::move(ping));
+      }
+      if (packet->getPacketId() == 0x01) {
+        auto p = reinterpret_cast<McProtocol::StatusPongPacket *>(packet.get());
+        std::cout << p->getPayload() << std::endl;
+      }
+    } else if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::LOGIN) {
+      if (packet->getPacketId() == 0x02) {
+        auto p = reinterpret_cast<McProtocol::LoginSuccessPacket *>(packet.get());
+        std::cout << "name: " << p->getUserName() << " UUID: " << p->getUUID() << std::endl;
+      }
+    }
 
+    if (packets_to_process.size() == 100000) {
+      break;
+    }
+  }
 }
 
 int main() {

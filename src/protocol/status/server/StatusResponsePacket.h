@@ -14,6 +14,10 @@ class StatusResponsePacket : public Packet{
   void read(DecodeStream* stream);
   void write(EncodeStream* stream);
 
+  std::string getInfo() const{
+    return info;
+  }
+
  private:
   std::string info;
 };
