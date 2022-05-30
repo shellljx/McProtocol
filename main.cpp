@@ -54,39 +54,40 @@ std::unique_ptr<McProtocol::ByteData> decomp(McProtocol::DecodeStream *stream, i
   int chunk = 1024 * 6;
   unsigned have;
   z_stream strm;
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
-  strm.avail_in = 0;
-  strm.next_in = Z_NULL;
+  memset(&strm, 0, sizeof(strm));
+
+  unsigned char input[stream->bytesAvailable()];
+  uint32_t avaliable = stream->bytesAvailable();
+  memcpy(input, stream->readBytes(avaliable).data(), avaliable);
+
+  strm.avail_in = avaliable;
+  strm.next_in = input;
 
   ret = inflateInit(&strm);
   if (ret != Z_OK) {
     throw std::runtime_error("zlib init failed");
   }
 
-  unsigned char input[stream->bytesAvailable()];
-  uint32_t avaliable = stream->bytesAvailable();
-  memcpy(input, stream->readBytes(avaliable).data(), avaliable);
-  strm.avail_in = stream->bytesAvailable();
-  strm.next_in = input;
   unsigned char output[chunk];
   McProtocol::EncodeStream outStream(outSize);
   do {
     strm.avail_out = chunk;
     strm.next_out = output;
+    if (strm.avail_in == 0) {
+      inflateEnd(&strm);
+      return outStream.release();
+    }
     ret = inflate(&strm, Z_NO_FLUSH);
-    assert(ret != Z_STREAM_ERROR);
     switch (ret) {
-      case Z_NEED_DICT:ret = Z_DATA_ERROR;
-      case Z_DATA_ERROR:
-      case Z_MEM_ERROR: {
+      case Z_OK:
+      case Z_STREAM_END:have = chunk - strm.avail_out;
+        outStream.writeBytes(output, have);
+        break;
+      default: {
         inflateEnd(&strm);
         throw std::runtime_error("zlib inflate error");
       }
     }
-    have = chunk - strm.avail_out;
-    outStream.writeBytes(output, have);
   } while (strm.avail_out == 0);
   inflateEnd(&strm);
   return outStream.release();
@@ -95,13 +96,13 @@ std::unique_ptr<McProtocol::ByteData> decomp(McProtocol::DecodeStream *stream, i
 void createClientBoundPacket(McProtocol::DecodeStream *stream) {
   int packetid = stream->readVerInt();
   auto packet = packetFactory.createClientBoundPacket(packetid);
-  if (packet == nullptr){
+  if (packet == nullptr) {
     return;
   }
   packet->read(stream);
 
-  if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::LOGIN && packetid == 3){
-    auto p = reinterpret_cast<McProtocol::SetCompressionPacket*>(packet.get());
+  if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::LOGIN && packetid == 3) {
+    auto p = reinterpret_cast<McProtocol::SetCompressionPacket *>(packet.get());
     enableCompression = true;
     compressionThreshold = p->getCompressionThreshold();
   }
@@ -158,16 +159,16 @@ void ReadThread() {
       //check validate varint
       bool notVarint = false;
       for (int i = 0; i < 5; ++i) {
-        if (decode_stream.bytesAvailable()==0){
+        if (decode_stream.bytesAvailable() == 0) {
           notVarint = true;
           break;
         }
-        if(decode_stream.readInt8()>=0){
+        if (decode_stream.readInt8() >= 0) {
           break;
         }
       }
       decode_stream.setPosition(oldPosition);
-      if (notVarint){
+      if (notVarint) {
         break;
       }
       auto packetLength = decode_stream.readVerInt();
@@ -208,10 +209,7 @@ std::unique_ptr<McProtocol::ByteData> compression(McProtocol::DecodeStream *in) 
   int chunk = 1024 * 6;
   unsigned have;
   z_stream strm;
-
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
+  memset(&strm, 0, sizeof(strm));
   ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
   if (ret != Z_OK) {
     throw std::runtime_error("deflate init error");
