@@ -48,7 +48,7 @@ add_executable(socket
         src/protocol/ingame/client/ClientKeepAlivePacket.h
         src/protocol/ingame/client/ClientStatusPacket.cpp
         src/protocol/ingame/client/ClientStatusPacket.h
-        )
+        src/protocol/ingame/client/ClientChatPacket.cpp src/protocol/ingame/client/ClientChatPacket.h)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/openssl.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/zlib.cmake")

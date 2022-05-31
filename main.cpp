@@ -22,6 +22,7 @@
 #include "src/protocol/login/server/SetCompressionPacket.h"
 #include "src/protocol/ingame/client/ClientKeepAlivePacket.h"
 #include "src/protocol/ingame/server/ServerKeepAlivePacket.h"
+#include "src/protocol/ingame/client/ClientChatPacket.h"
 #include "src/codec/EncryptionCodec.h"
 #include "src/codec/SizerCodec.h"
 #include "src/codec/CompressionCodec.h"
@@ -83,6 +84,7 @@ void createClientBoundPacket(McProtocol::DecodeStream *stream) {
       sendPacket(std::move(op));
       if (a){
         sendPacket(packetFactory.createServerBoundPacket(0x04));
+        sendPacket(std::unique_ptr<McProtocol::Packet>(new McProtocol::ClientChatPacket("hello world i am a robot")));
         a = false;
       }
     }
