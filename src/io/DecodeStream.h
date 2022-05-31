@@ -65,7 +65,7 @@ class DecodeStream final {
     return readBit64().doubleValue;
   }
 
-  int readVerInt();
+  int readVarInt();
 
   std::string readUTF8String();
 

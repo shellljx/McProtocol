@@ -30,7 +30,7 @@ void DecodeStream::skip(uint32_t bytes) {
   }
 }
 
-int DecodeStream::readVerInt() {
+int DecodeStream::readVarInt() {
   int value = 0;
   int position = 0;
   uint8_t currentByte;
@@ -48,7 +48,7 @@ int DecodeStream::readVerInt() {
 
 std::string DecodeStream::readUTF8String() {
   if (position_ < length_) {
-    uint32_t textLength = readVerInt();
+    uint32_t textLength = readVarInt();
     auto text = reinterpret_cast<const char *>(bytes_ + position_);
     if (textLength > length_ - position_) {
       textLength = length_ - position_;
