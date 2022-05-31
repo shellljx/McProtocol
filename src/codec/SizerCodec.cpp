@@ -22,7 +22,7 @@ DecodeStream SizerCodec::decode(DecodeStream &in) {
   if (notVarint) {
     return {nullptr, 0};
   }
-  auto packetLength = in.readVerInt();
+  auto packetLength = in.readVarInt();
   if (packetLength > 0 && packetLength <= in.bytesAvailable()) {
     return in.readBytes(packetLength);
   } else {

@@ -54,9 +54,9 @@ void sendPacket(std::unique_ptr<McProtocol::Packet> packet) {
   packets_to_send.push(std::move(packet));
   send_condition.notify_all();
 }
-
+bool a = true;
 void createClientBoundPacket(McProtocol::DecodeStream *stream) {
-  int packetid = stream->readVerInt();
+  int packetid = stream->readVarInt();
   std::cout<<"packet: "<<packetid<<std::endl;
   auto packet = packetFactory.createClientBoundPacket(packetid);
   if (packet == nullptr) {
@@ -81,6 +81,10 @@ void createClientBoundPacket(McProtocol::DecodeStream *stream) {
       auto op = std::unique_ptr<McProtocol::ClientKeepAlivePacket>(new McProtocol::ClientKeepAlivePacket);
       op->setKeepAliveId(livep->getKeepAliveId());
       sendPacket(std::move(op));
+      if (a){
+        sendPacket(packetFactory.createServerBoundPacket(0x04));
+        a = false;
+      }
     }
   }
 

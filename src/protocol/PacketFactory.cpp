@@ -13,6 +13,7 @@
 #include "./login/server/SetCompressionPacket.h"
 #include "./ingame/server/ServerKeepAlivePacket.h"
 #include "./ingame/client/ClientKeepAlivePacket.h"
+#include "./ingame/client/ClientStatusPacket.h"
 
 namespace McProtocol {
 
@@ -44,6 +45,7 @@ std::unique_ptr<Packet> PacketFactory::createServerBoundPacket(int id) {
   } else if (status_ == ProtocolStatus::INGAME) {
     switch (id) {
       case 0x0F:return std::unique_ptr<Packet>(new ClientKeepAlivePacket());
+      case 0x04:return std::unique_ptr<Packet>(new ClientStatusPacket());
       default:return nullptr;
     }
   } else {

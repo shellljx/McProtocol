@@ -10,7 +10,7 @@ namespace McProtocol {
 
 std::unique_ptr<ByteData> CompressionCodec::decode(DecodeStream &in) {
   if (enable_) {
-    auto dataLength = in.readVerInt();
+    auto dataLength = in.readVarInt();
     if (dataLength <= 0) {
       //datalength is zero without compression
       auto length = in.bytesAvailable();

@@ -16,6 +16,6 @@ void SetCompressionPacket::write(EncodeStream *stream) {
 }
 
 void SetCompressionPacket::read(DecodeStream *stream) {
-  threshold = stream->readVerInt();
+  threshold = stream->readVarInt();
 }
 }
