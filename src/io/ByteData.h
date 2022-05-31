@@ -9,12 +9,13 @@ namespace McProtocol {
 class ByteData {
  public:
   static std::unique_ptr<ByteData> MakeCopy(const void *bytes, size_t length);
+  static std::unique_ptr<ByteData> MakeWithoutCopy(const uint8_t *data, size_t length);
   static std::unique_ptr<ByteData> Make(size_t length);
-  static std::unique_ptr<ByteData> MakeAdopted(uint8_t* data, size_t length);
+  static std::unique_ptr<ByteData> MakeAdopted(uint8_t *data, size_t length);
 
-  ~ByteData(){
-    if (data_){
-      delete[] data_;
+  ~ByteData() {
+    if (releaseCallback_) {
+      releaseCallback_(data_);
     }
   };
 
@@ -22,7 +23,7 @@ class ByteData {
    * returns the memory address of byte data.
    * @return
    */
-  uint8_t *data() const {
+  const uint8_t *data() const {
     return data_;
   }
 
@@ -35,11 +36,16 @@ class ByteData {
   }
 
  private:
-  ByteData(uint8_t *data, size_t length) : data_(data), length_(length) {
+  static void DeleteCallback(const uint8_t *data) {
+    delete[] data;
+  }
+  ByteData(const uint8_t *data, size_t length, std::function<void(const uint8_t *)> releaseCallback = DeleteCallback)
+      : data_(data), length_(length), releaseCallback_(std::move(releaseCallback)) {
   }
 
  private:
-  uint8_t *data_;
+  const uint8_t *data_;
   size_t length_;
+  const std::function<void(const uint8_t *)> releaseCallback_;
 };
 }

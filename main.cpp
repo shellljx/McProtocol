@@ -20,7 +20,11 @@
 #include "src/protocol/status/server/StatusPongPacket.h"
 #include "src/protocol/login/server/LoginSuccess.h"
 #include "src/protocol/login/server/SetCompressionPacket.h"
+#include "src/protocol/ingame/client/ClientKeepAlivePacket.h"
+#include "src/protocol/ingame/server/ServerKeepAlivePacket.h"
 #include "src/codec/EncryptionCodec.h"
+#include "src/codec/SizerCodec.h"
+#include "src/codec/CompressionCodec.h"
 #include "src/protocol/PacketFactory.h"
 
 int client_socket;
@@ -35,6 +39,8 @@ std::condition_variable process_condition;
 
 bool enableEncryption = false;
 McProtocol::EncryptionCodec encryptionCodec;
+McProtocol::SizerCodec sizerCodec;
+McProtocol::CompressionCodec compressionCodec;
 bool enableCompression = false;
 int compressionThreshold;
 
@@ -49,62 +55,33 @@ void sendPacket(std::unique_ptr<McProtocol::Packet> packet) {
   send_condition.notify_all();
 }
 
-std::unique_ptr<McProtocol::ByteData> decomp(McProtocol::DecodeStream *stream, int outSize) {
-  int ret;
-  int chunk = 1024 * 6;
-  unsigned have;
-  z_stream strm;
-  memset(&strm, 0, sizeof(strm));
-
-  unsigned char input[stream->bytesAvailable()];
-  uint32_t avaliable = stream->bytesAvailable();
-  memcpy(input, stream->readBytes(avaliable).data(), avaliable);
-
-  strm.avail_in = avaliable;
-  strm.next_in = input;
-
-  ret = inflateInit(&strm);
-  if (ret != Z_OK) {
-    throw std::runtime_error("zlib init failed");
-  }
-
-  unsigned char output[chunk];
-  McProtocol::EncodeStream outStream(outSize);
-  do {
-    strm.avail_out = chunk;
-    strm.next_out = output;
-    if (strm.avail_in == 0) {
-      inflateEnd(&strm);
-      return outStream.release();
-    }
-    ret = inflate(&strm, Z_NO_FLUSH);
-    switch (ret) {
-      case Z_OK:
-      case Z_STREAM_END:have = chunk - strm.avail_out;
-        outStream.writeBytes(output, have);
-        break;
-      default: {
-        inflateEnd(&strm);
-        throw std::runtime_error("zlib inflate error");
-      }
-    }
-  } while (strm.avail_out == 0);
-  inflateEnd(&strm);
-  return outStream.release();
-}
-
 void createClientBoundPacket(McProtocol::DecodeStream *stream) {
   int packetid = stream->readVerInt();
+  std::cout<<"packet: "<<packetid<<std::endl;
   auto packet = packetFactory.createClientBoundPacket(packetid);
   if (packet == nullptr) {
     return;
   }
   packet->read(stream);
 
-  if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::LOGIN && packetid == 3) {
-    auto p = reinterpret_cast<McProtocol::SetCompressionPacket *>(packet.get());
-    enableCompression = true;
-    compressionThreshold = p->getCompressionThreshold();
+  if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::LOGIN) {
+    if (packetid == 3){
+      auto p = reinterpret_cast<McProtocol::SetCompressionPacket *>(packet.get());
+      enableCompression = true;
+      compressionCodec.setEnable(true);
+      compressionThreshold = p->getCompressionThreshold();
+    } else if (packetid == 2){
+      packetFactory.setProtocolStatus(McProtocol::ProtocolStatus::INGAME);
+    }
+  }
+
+  if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::INGAME) {
+    auto livep = reinterpret_cast<McProtocol::ServerKeepAlivePacket*>(packet.get());
+    if (packetid == 0x21){
+      auto op = std::unique_ptr<McProtocol::ClientKeepAlivePacket>(new McProtocol::ClientKeepAlivePacket);
+      op->setKeepAliveId(livep->getKeepAliveId());
+      sendPacket(std::move(op));
+    }
   }
 
   std::unique_lock<std::mutex> lock(mutex_process);
@@ -132,67 +109,32 @@ void ReadThread() {
 
   McProtocol::EncodeStream encodeStream(256);
   while (true) {
-    auto buffer = new unsigned char[256];
+    unsigned char buffer[256];
     int length = read(client_socket, buffer, sizeof(buffer));
-    std::cout << "receive " << encodeStream.length() << std::endl;
+    //std::cout << "receive " << length << std::endl;
     if (length == 0) {
       close(client_socket);
       return;
     }
 
-    if (enableEncryption) {
-      unsigned char *out = nullptr;
-      int outLength = 0;
-      encryptionCodec.decode(buffer, length, out, outLength);
-      delete[] buffer;
-      encodeStream.writeBytes(out, outLength);
-    } else {
-      encodeStream.writeBytes(buffer, length);
-      delete[] buffer;
+    //encrypttion codec
+    {
+      auto byteData = encryptionCodec.decode(buffer, length);
+      encodeStream.writeBytes(byteData->data(), byteData->length());
     }
 
+    //sizer codec
     auto byteData = encodeStream.release();
-
     McProtocol::DecodeStream decode_stream(byteData->data(), byteData->length());
     while (decode_stream.bytesAvailable() > 0) {
-      auto oldPosition = decode_stream.position();
-      //check validate varint
-      bool notVarint = false;
-      for (int i = 0; i < 5; ++i) {
-        if (decode_stream.bytesAvailable() == 0) {
-          notVarint = true;
-          break;
-        }
-        if (decode_stream.readInt8() >= 0) {
-          break;
-        }
-      }
-      decode_stream.setPosition(oldPosition);
-      if (notVarint) {
+      auto packetDecodeStream = sizerCodec.decode(decode_stream);
+      if (packetDecodeStream.data() == nullptr) {
         break;
       }
-      auto packetLength = decode_stream.readVerInt();
-      if (packetLength > 0 && packetLength <= decode_stream.bytesAvailable()) {
-        auto packetStream = decode_stream.readBytes(packetLength);
-
-        if (enableCompression) {
-          auto dataLength = packetStream.readVerInt();
-          if (dataLength <= 0) {
-            //datalength is zero without compression
-            createClientBoundPacket(&packetStream);
-          } else {
-            auto decompPacketData = decomp(&packetStream, dataLength);
-            //todo nullpt
-            auto decodePacketSream = McProtocol::DecodeStream(decompPacketData->data(), decompPacketData->length());
-            createClientBoundPacket(&decodePacketSream);
-          }
-        } else {
-          createClientBoundPacket(&packetStream);
-        }
-      } else {
-        decode_stream.setPosition(oldPosition);
-        break;
-      }
+      //compression codec
+      auto packetByteData = compressionCodec.decode(packetDecodeStream);
+      McProtocol::DecodeStream decode_stream1(packetByteData->data(), packetByteData->length());
+      createClientBoundPacket(&decode_stream1);
     }
 
     if (decode_stream.bytesAvailable() > 0) {

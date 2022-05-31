@@ -87,6 +87,26 @@ void EncodeStream::writeUInt16(uint16_t value) {
   writeBit16(data);
 }
 
+void EncodeStream::writeUint32(uint32_t value) {
+  Bit32 data = {};
+  data.uintValue = value;
+  writeBit32(data);
+}
+
+void EncodeStream::writeInt32(int32_t value) {
+  ensureCapacity(position_ + 4);
+  if (order_ == ByteOrder::BigEndian) {
+    for (int i = 0; i < 4; i++) {
+      bytes_[position_++] = value >> i * 8;
+    }
+  } else {
+    for (int i = 3; i >= 0; i--) {
+      bytes_[position_++] = value >> i * 8;
+    }
+  }
+  positionChanged();
+}
+
 void EncodeStream::writeInt64(int64_t value) {
   Bit64 data = {};
   data.intValue = value;
@@ -149,7 +169,7 @@ void EncodeStream::writeBit8(Bit8 data) {
 
 void EncodeStream::writeBit16(Bit16 data) {
   ensureCapacity(position_ + 2);
-  if (order_ == NATIVE_BYTE_ORDER) {
+  if (order_ == ByteOrder::BigEndian) {
     bytes_[position_++] = data.bytes[0];
     bytes_[position_++] = data.bytes[1];
   } else {
@@ -159,9 +179,23 @@ void EncodeStream::writeBit16(Bit16 data) {
   positionChanged();
 }
 
+void EncodeStream::writeBit32(Bit32 data) {
+  ensureCapacity(position_ + 4);
+  if (order_ == ByteOrder::BigEndian) {
+    for (int i = 0; i < 4; i++) {
+      bytes_[position_++] = data.bytes[i];
+    }
+  } else {
+    for (int i = 3; i >= 0; i--) {
+      bytes_[position_++] = data.bytes[i];
+    }
+  }
+  positionChanged();
+}
+
 void EncodeStream::writeBit64(Bit64 data) {
   ensureCapacity(position_ + 8);
-  if (order_ == NATIVE_BYTE_ORDER) {
+  if (order_ == ByteOrder::BigEndian) {
     for (int i = 0; i < 8; i++) {
       bytes_[position_++] = data.bytes[i];
     }

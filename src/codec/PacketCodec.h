@@ -2,11 +2,15 @@
 // Created by 李金祥 on 2022/5/28.
 //
 
-#ifndef SOCKET_SRC_HANDLE_PACKETHANDLE_H_
-#define SOCKET_SRC_HANDLE_PACKETHANDLE_H_
+#pragma once
+
+#include "../io/EncodeStream.h"
+#include "../io/DecodeStream.h"
+
+namespace McProtocol {
 
 class PacketCodec {
-
+ public:
+  DecodeStream decode(const DecodeStream *in);
 };
-
-#endif //SOCKET_SRC_HANDLE_PACKETHANDLE_H_
+}

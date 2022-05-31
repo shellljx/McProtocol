@@ -49,6 +49,10 @@ class DecodeStream final {
     return readBit8().intValue;
   }
 
+  int32_t readInt32() {
+    return readBit32().intValue;
+  }
+
   int64_t readInt64() {
     return readBit64().intValue;
   }
@@ -74,6 +78,7 @@ class DecodeStream final {
 
  private:
   Bit8 readBit8();
+  Bit32 readBit32();
   Bit64 readBit64();
 
  private:

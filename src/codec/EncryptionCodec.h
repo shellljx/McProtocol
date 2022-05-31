@@ -16,13 +16,15 @@ class EncryptionCodec {
   EncryptionCodec();
   ~EncryptionCodec();
 
+  void setEnable();
   void encode(const unsigned char *in, int length, unsigned char *out, int &outLength);
 
-  void decode(const unsigned  char* in, int length, unsigned char* out, int& outLength);
+  std::unique_ptr<ByteData> decode(const unsigned  char* in, int length);
 
  private:
   EVP_CIPHER_CTX* encryption_context;
   EVP_CIPHER_CTX* decryption_context;
-  unsigned int blocksize;
+  unsigned int blocksize = 0;
+  bool enable = false;
 };
 }

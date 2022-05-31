@@ -3,3 +3,10 @@
 //
 
 #include "PacketCodec.h"
+
+namespace McProtocol{
+
+DecodeStream PacketCodec::decode(const DecodeStream *in) {
+
+}
+}

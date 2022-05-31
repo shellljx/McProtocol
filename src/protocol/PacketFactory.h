@@ -6,7 +6,7 @@
 #include "Packet.h"
 
 namespace McProtocol {
-enum class ProtocolStatus { NONE, HANDSHAKE ,STATUS, LOGIN };
+enum class ProtocolStatus { NONE, HANDSHAKE ,STATUS, LOGIN, INGAME };
 class PacketFactory {
  public:
   explicit PacketFactory();

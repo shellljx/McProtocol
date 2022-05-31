@@ -25,6 +25,10 @@ EncryptionCodec::~EncryptionCodec() {
   }
 }
 
+void EncryptionCodec::setEnable() {
+  enable = true;
+}
+
 void EncryptionCodec::encode(const unsigned char *in, int length, unsigned char *out, int &outLength) {
   if (encryption_context == nullptr) {
     throw std::runtime_error("encode openssl was not init");
@@ -33,12 +37,17 @@ void EncryptionCodec::encode(const unsigned char *in, int length, unsigned char 
   EVP_EncryptUpdate(encryption_context, out, &outLength, in, length);
 }
 
-void EncryptionCodec::decode(const unsigned char *in, int length, unsigned char *out, int &outLength) {
-  if (decryption_context == nullptr) {
-    throw std::runtime_error("decode openssl was not init");
+std::unique_ptr<ByteData> EncryptionCodec::decode(const unsigned char *in, int length) {
+  if (decryption_context == nullptr || !enable) {
+    return ByteData::MakeCopy(in, length);
   }
 
-  out = new unsigned char[length + blocksize];
+  unsigned char out[length + blocksize];
+  int outLength = 0;
   EVP_DecryptUpdate(decryption_context, out, &outLength, in, length);
+  if (outLength > 0) {
+    return ByteData::MakeCopy(out, outLength);
+  }
+  return nullptr;
 }
 }

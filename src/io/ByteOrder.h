@@ -10,9 +10,6 @@
 
 namespace McProtocol {
 enum class ByteOrder {LittleEndian, BigEndian};
-ByteOrder EndianTest();
-
-static const ByteOrder NATIVE_BYTE_ORDER = EndianTest();
 
 union Bit8 {
   int8_t intValue;
@@ -24,6 +21,13 @@ union Bit16 {
   uint8_t bytes[2];
   int16_t intValue;
   uint16_t uintValue;
+};
+
+union Bit32 {
+  uint8_t bytes[4];
+  int32_t intValue;
+  uint32_t uintValue;
+  float floatValue;
 };
 
 union Bit64 {

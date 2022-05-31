@@ -3,8 +3,21 @@
 //
 
 #pragma once
+#include "../io/EncodeStream.h"
+#include "../io/DecodeStream.h"
 
 namespace McProtocol{
-void compress();
-void decompress();
+class CompressionCodec {
+ public:
+  std::unique_ptr<ByteData> decode(DecodeStream& in);
+
+  void setEnable(bool enable){
+    enable_ = enable;
+  }
+
+ private:
+  std::unique_ptr<McProtocol::ByteData> deCompression(DecodeStream & in, int uLength);
+ private:
+  bool enable_ = false;
+};
 }

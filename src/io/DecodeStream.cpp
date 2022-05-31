@@ -61,11 +61,11 @@ std::string DecodeStream::readUTF8String() {
 }
 
 DecodeStream DecodeStream::readBytes(uint32_t length) {
-  if ((length_ >= length) && (position_ <= length_ - length)){
-    DecodeStream stream(bytes_+position_,length);
-    position_+=length;
+  if ((length_ >= length) && (position_ <= length_ - length)) {
+    DecodeStream stream(bytes_ + position_, length);
+    position_ += length;
     return stream;
-  } else{
+  } else {
     throw std::runtime_error("readBytes was encountered.");
   }
 }
@@ -80,15 +80,30 @@ Bit8 DecodeStream::readBit8() {
   }
 }
 
+Bit32 DecodeStream::readBit32() {
+  Bit32 data = {};
+  if ((length_ > 3) && (position_ < length_ - 3)) {
+    if (order_ == ByteOrder::BigEndian) {
+      for (int i = 0; i < 4; i++) {
+        data.bytes[i] = bytes_[position_++];
+      }
+    } else {
+      for (int i = 3; i >= 0; i--) {
+        data.bytes[i] = bytes_[position_++];
+      }
+    }
+  }
+}
+
 Bit64 DecodeStream::readBit64() {
   Bit64 data = {};
   if ((length_ > 7) && (position_ < length_ - 7)) {
-    if (order_ == NATIVE_BYTE_ORDER) {
+    if (order_ == ByteOrder::BigEndian) {
       for (int i = 0; i < 8; ++i) {
         data.bytes[i] = bytes_[position_++];
       }
     } else {
-      for (int i = 0; i < 8; ++i) {
+      for (int i = 7; i >= 0; i--) {
         data.bytes[i] = bytes_[position_++];
       }
     }

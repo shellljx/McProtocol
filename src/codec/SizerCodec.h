@@ -11,5 +11,7 @@
 namespace McProtocol {
 
 class SizerCodec {
+ public:
+  DecodeStream decode(DecodeStream& in);
 };
 }
