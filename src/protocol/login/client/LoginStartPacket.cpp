@@ -11,10 +11,10 @@ LoginStartPacket::~LoginStartPacket() noexcept {
 }
 
 void LoginStartPacket::write(EncodeStream *stream) {
-  stream->writeUTF8String(userName);
+  stream->writeVarString(userName);
 }
 
 void LoginStartPacket::read(DecodeStream *stream) {
-  userName = stream->readUTF8String();
+  userName = stream->readVarString();
 }
 }

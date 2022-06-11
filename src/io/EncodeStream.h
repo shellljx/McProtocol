@@ -62,7 +62,7 @@ class EncodeStream final {
   void writeDouble(double value);
 
   void writeVarInt(int value);
-  void writeUTF8String(const std::string &text);
+  void writeVarString(const std::string &text);
 
   /**
    * Take ownership of the current bytes. Once the release method is called, the EncodeStream object will be
@@ -91,7 +91,7 @@ class EncodeStream final {
   void writeBit64(Bit64 data);
 
  private:
-  ByteOrder order_ = ByteOrder::LittleEndian;
+  ByteOrder order_ = EndianTest();
   uint8_t *bytes_ = nullptr;
   uint32_t capacity_ = 0;
   uint32_t length_ = 0;

@@ -46,13 +46,25 @@ int DecodeStream::readVarInt() {
   return value;
 }
 
-std::string DecodeStream::readUTF8String() {
+std::string DecodeStream::readVarString() {
   if (position_ < length_) {
     uint32_t textLength = readVarInt();
     auto text = reinterpret_cast<const char *>(bytes_ + position_);
     if (textLength > length_ - position_) {
       textLength = length_ - position_;
-      position_ += textLength;
+    }
+    position_ += textLength;
+    return std::string(text, textLength);
+  }
+  return "";
+}
+
+std::string DecodeStream::readUtfString() {
+  if (position_ < length_) {
+    uint16_t textLength = readUint16();
+    auto text = reinterpret_cast<const char *>(bytes_ + position_);
+    if (textLength > length_ - position_) {
+      textLength = length_ - position_;
     }
     position_ += textLength;
     return std::string(text, textLength);
@@ -70,6 +82,14 @@ DecodeStream DecodeStream::readBytes(uint32_t length) {
   }
 }
 
+std::unique_ptr<ByteData> DecodeStream::readByteData(uint32_t length) {
+  auto bytes = readBytes(length);
+  if (length == 0) {
+    return nullptr;
+  }
+  return ByteData::MakeCopy(bytes.data(), length);
+}
+
 Bit8 DecodeStream::readBit8() {
   Bit8 data = {};
   if (position_ < length_) {
@@ -77,6 +97,22 @@ Bit8 DecodeStream::readBit8() {
     return data;
   } else {
     throw std::runtime_error("decode stream readbit8 encountered.");
+  }
+}
+
+Bit16 DecodeStream::readBit16() {
+  Bit16 data = {};
+  if ((length_ > 1) && (position_ < length_ - 1)) {
+    if (order_ == ByteOrder::BigEndian) {
+      data.bytes[0] = bytes_[position_++];
+      data.bytes[1] = bytes_[position_++];
+    } else {
+      data.bytes[1] = bytes_[position_++];
+      data.bytes[0] = bytes_[position_++];
+    }
+    return data;
+  } else {
+    throw std::runtime_error("decode stream readbit16 encountered.");
   }
 }
 
@@ -92,6 +128,9 @@ Bit32 DecodeStream::readBit32() {
         data.bytes[i] = bytes_[position_++];
       }
     }
+    return data;
+  } else {
+    throw std::runtime_error("decode stream readbit16 encountered.");
   }
 }
 
@@ -107,9 +146,9 @@ Bit64 DecodeStream::readBit64() {
         data.bytes[i] = bytes_[position_++];
       }
     }
+    return data;
   } else {
     throw std::runtime_error("readBit64 was encountered.");
   }
-  return data;
 }
 }

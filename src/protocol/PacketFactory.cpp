@@ -11,9 +11,10 @@
 #include "./login/client/LoginStartPacket.h"
 #include "./login/server/LoginSuccess.h"
 #include "./login/server/SetCompressionPacket.h"
-#include "./ingame/server/ServerKeepAlivePacket.h"
-#include "./ingame/client/ClientKeepAlivePacket.h"
-#include "./ingame/client/ClientStatusPacket.h"
+#include "ingame/clientbound/ServerKeepAlivePacket.h"
+#include "ingame/serverbound/ClientKeepAlivePacket.h"
+#include "ingame/serverbound/ClientStatusPacket.h"
+#include "ingame/clientbound/chunk/ServerChunkDataPacket.h"
 
 namespace McProtocol {
 
@@ -69,6 +70,7 @@ std::unique_ptr<Packet> PacketFactory::createClientBoundPacket(int id) {
   } else if (status_ == ProtocolStatus::INGAME) {
     switch (id) {
       case 0x21:return std::unique_ptr<Packet>(new ServerKeepAlivePacket());
+      case 0x22:return std::unique_ptr<Packet>(new ServerChunkDataPacket());
       default:return nullptr;
     }
   } else {

@@ -8,10 +8,10 @@ namespace McProtocol {
 class ClientKeepAlivePacket : public Packet {
  public:
   ClientKeepAlivePacket();
-  ~ClientKeepAlivePacket();
+  ~ClientKeepAlivePacket() override;
 
-  void read(DecodeStream *stream);
-  void write(EncodeStream *stream);
+  void read(DecodeStream *stream) override;
+  void write(EncodeStream *stream) override;
 
   long getKeepAliveId() const {
     return keepAliveId_;

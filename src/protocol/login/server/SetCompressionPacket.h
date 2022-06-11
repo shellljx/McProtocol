@@ -8,10 +8,10 @@ namespace McProtocol {
 class SetCompressionPacket : public Packet {
  public:
   SetCompressionPacket();
-  ~SetCompressionPacket();
+  ~SetCompressionPacket() override;
 
-  void read(DecodeStream *stream);
-  void write(EncodeStream *stream);
+  void read(DecodeStream *stream) override;
+  void write(EncodeStream *stream) override;
 
   int getCompressionThreshold() const {
     return threshold;

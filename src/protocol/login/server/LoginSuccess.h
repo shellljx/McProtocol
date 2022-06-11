@@ -8,10 +8,10 @@ namespace McProtocol {
 class LoginSuccessPacket : public Packet {
  public:
   LoginSuccessPacket();
-  ~LoginSuccessPacket();
+  ~LoginSuccessPacket() override;
 
-  void read(DecodeStream *stream);
-  void write(EncodeStream *stream);
+  void read(DecodeStream *stream) override;
+  void write(EncodeStream *stream) override;
 
   std::string getUUID() const {
     return uuid;

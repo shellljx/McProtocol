@@ -8,8 +8,7 @@ namespace McProtocol {
 StatusRequestPacket::StatusRequestPacket() : Packet(0) {
 }
 
-StatusRequestPacket::~StatusRequestPacket() noexcept {
-}
+StatusRequestPacket::~StatusRequestPacket() = default;
 
 void StatusRequestPacket::write(EncodeStream *stream) {
 

@@ -9,13 +9,11 @@ HandshakePacket::HandshakePacket() : Packet(0) {
 
 }
 
-HandshakePacket::~HandshakePacket() noexcept {
-
-}
+HandshakePacket::~HandshakePacket() = default;
 
 void HandshakePacket::write(EncodeStream *stream) {
   stream->writeVarInt(protocolVersion_);
-  stream->writeUTF8String(serverAddr_);
+  stream->writeVarString(serverAddr_);
   stream->writeInt16(serverPort);
   stream->writeVarInt(intent);
 }

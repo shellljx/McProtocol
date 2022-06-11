@@ -5,11 +5,10 @@
 #include "SetCompressionPacket.h"
 
 namespace McProtocol {
-SetCompressionPacket::SetCompressionPacket() : Packet(0x03) {
+SetCompressionPacket::SetCompressionPacket() : Packet(0x03), threshold(0) {
 }
 
-SetCompressionPacket::~SetCompressionPacket() noexcept {
-}
+SetCompressionPacket::~SetCompressionPacket() = default;
 
 void SetCompressionPacket::write(EncodeStream *stream) {
 

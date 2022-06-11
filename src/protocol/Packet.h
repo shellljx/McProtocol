@@ -2,20 +2,18 @@
 // Created by 李金祥 on 2022/5/28.
 //
 #pragma once
-#include "../io/DecodeStream.h"
-#include "../io/EncodeStream.h"
+#include "../io/ReadWriteable.h"
 
 namespace McProtocol {
-class Packet {
+class Packet : public ReadWriteable {
  public:
   Packet(int packetId) : packetId_(packetId) {
 
   }
-  virtual ~Packet() {
-  };
+  ~Packet() override = default;
 
-  virtual void read(DecodeStream *stream) = 0;
-  virtual void write(EncodeStream *stream) = 0;
+  void read(DecodeStream *stream) override = 0;
+  void write(EncodeStream *stream) override = 0;
 
   int getPacketId() const {
     return packetId_;

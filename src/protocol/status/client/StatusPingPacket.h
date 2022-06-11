@@ -7,10 +7,10 @@ namespace McProtocol {
 class StatusPingPacket : public Packet {
  public:
   StatusPingPacket();
-  ~StatusPingPacket();
+  ~StatusPingPacket() override;
 
-  void read(DecodeStream *stream);
-  void write(EncodeStream *stream);
+  void read(DecodeStream *stream) override;
+  void write(EncodeStream *stream) override;
 
   void setPayload(long payload) {
     pingTime = payload;

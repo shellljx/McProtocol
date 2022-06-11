@@ -8,8 +8,7 @@ namespace McProtocol {
 ClientStatusPacket::ClientStatusPacket() : Packet(0x04) {
 }
 
-ClientStatusPacket::~ClientStatusPacket() noexcept {
-}
+ClientStatusPacket::~ClientStatusPacket() = default;
 
 void ClientStatusPacket::write(EncodeStream *stream) {
   stream->writeVarInt(action_);

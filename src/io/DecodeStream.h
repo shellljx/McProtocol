@@ -49,6 +49,14 @@ class DecodeStream final {
     return readBit8().intValue;
   }
 
+  int16_t readInt16() {
+    return readBit16().intValue;
+  }
+
+  uint16_t readUint16() {
+    return readBit16().uintValue;
+  }
+
   int32_t readInt32() {
     return readBit32().intValue;
   }
@@ -61,13 +69,25 @@ class DecodeStream final {
     return readBit64().uintValue;
   }
 
+  float readFloat() {
+    return readBit32().floatValue;
+  }
+
   double readDouble() {
     return readBit64().doubleValue;
   }
 
   int readVarInt();
 
-  std::string readUTF8String();
+  std::string readVarString();
+
+  /**
+   * First, two bytes are read and used to construct an unsigned 16-bit interger.
+   * This interger value is called the UTF length and specifies the number of additional bytes
+   * to be read.
+   * @return
+   */
+  std::string readUtfString();
 
   /**
    * reads the number of data bytes, specified by the length parameter, from the byte stream.
@@ -76,14 +96,22 @@ class DecodeStream final {
    */
   DecodeStream readBytes(uint32_t length);
 
+  /**
+   * Reads a ByteData object from the byte stream.
+   * @param length the number of bytes to read.
+   * @return
+   */
+  std::unique_ptr<ByteData> readByteData(uint32_t length);
+
  private:
   Bit8 readBit8();
+  Bit16 readBit16();
   Bit32 readBit32();
   Bit64 readBit64();
 
  private:
   const uint8_t *bytes_ = nullptr;
-  ByteOrder order_ = ByteOrder::LittleEndian;
+  ByteOrder order_ = EndianTest();
   uint32_t length_ = 0;
   uint32_t position_ = 0;
 };

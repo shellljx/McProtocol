@@ -8,7 +8,7 @@ namespace McProtocol {
 class LoginStartPacket : public Packet {
  public:
   LoginStartPacket();
-  ~LoginStartPacket();
+  ~LoginStartPacket() override;
 
   void read(DecodeStream *stream);
   void write(EncodeStream *stream);
@@ -17,6 +17,6 @@ class LoginStartPacket : public Packet {
     userName = name;
   }
  private:
-  std::string userName = "Username";
+  std::string userName = "protocol_player";
 };
 }

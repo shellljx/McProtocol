@@ -9,9 +9,9 @@ namespace McProtocol {
 class StatusRequestPacket : public Packet{
  public:
   StatusRequestPacket();
-  ~StatusRequestPacket();
+  ~StatusRequestPacket() override;
 
-  void read(DecodeStream* stream);
-  void write(EncodeStream* stream);
+  void read(DecodeStream* stream) override;
+  void write(EncodeStream* stream) override;
 };
 }

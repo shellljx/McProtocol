@@ -11,6 +11,8 @@
 namespace McProtocol {
 enum class ByteOrder {LittleEndian, BigEndian};
 
+ByteOrder EndianTest();
+
 union Bit8 {
   int8_t intValue;
   uint8_t uintValue;

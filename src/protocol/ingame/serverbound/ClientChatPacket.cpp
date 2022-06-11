@@ -11,7 +11,7 @@ ClientChatPacket::~ClientChatPacket() noexcept {
 }
 
 void ClientChatPacket::write(EncodeStream *stream) {
-  stream->writeUTF8String(message_);
+  stream->writeVarString(message_);
 }
 
 void ClientChatPacket::read(DecodeStream *stream) {

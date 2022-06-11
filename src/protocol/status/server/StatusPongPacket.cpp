@@ -8,8 +8,7 @@ namespace McProtocol {
 StatusPongPacket::StatusPongPacket() : Packet(0x01) {
 }
 
-StatusPongPacket::~StatusPongPacket() noexcept {
-}
+StatusPongPacket::~StatusPongPacket() = default;
 
 void StatusPongPacket::write(EncodeStream *stream) {
   stream->writeInt64(pingTime);

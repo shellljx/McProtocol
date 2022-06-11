@@ -137,7 +137,7 @@ void EncodeStream::writeVarInt(int value) {
   }
 }
 
-void EncodeStream::writeUTF8String(const std::string &text) {
+void EncodeStream::writeVarString(const std::string &text) {
   auto size = static_cast<int>(text.size());
   if (size > 32767) {
     throw std::runtime_error("string was too big, max 32767");

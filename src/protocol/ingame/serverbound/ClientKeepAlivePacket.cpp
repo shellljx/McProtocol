@@ -5,11 +5,10 @@
 #include "ClientKeepAlivePacket.h"
 
 namespace McProtocol {
-ClientKeepAlivePacket::ClientKeepAlivePacket() : Packet(0x0F) {
+ClientKeepAlivePacket::ClientKeepAlivePacket() : Packet(0x0F), keepAliveId_(0) {
 }
 
-ClientKeepAlivePacket::~ClientKeepAlivePacket() noexcept {
-}
+ClientKeepAlivePacket::~ClientKeepAlivePacket() = default;
 
 void ClientKeepAlivePacket::write(EncodeStream *stream) {
   stream->writeInt64(keepAliveId_);

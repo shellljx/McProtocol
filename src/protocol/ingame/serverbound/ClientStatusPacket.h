@@ -8,10 +8,10 @@ namespace McProtocol {
 class ClientStatusPacket : public Packet {
  public:
   ClientStatusPacket();
-  ~ClientStatusPacket();
+  ~ClientStatusPacket() override;
 
-  void read(DecodeStream *stream);
-  void write(EncodeStream *stream);
+  void read(DecodeStream *stream) override;
+  void write(EncodeStream *stream) override;
 
   void setAction(int action) {
     action_ = action;

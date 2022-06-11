@@ -8,14 +8,13 @@ namespace McProtocol {
 StatusResponsePacket::StatusResponsePacket() : Packet(0) {
 }
 
-StatusResponsePacket::~StatusResponsePacket() noexcept {
-}
+StatusResponsePacket::~StatusResponsePacket() = default;
 
 void StatusResponsePacket::write(EncodeStream *stream) {
 
 }
 
 void StatusResponsePacket::read(DecodeStream *stream) {
-  info = stream->readUTF8String();
+  info = stream->readVarString();
 }
 }

@@ -5,11 +5,10 @@
 #include "StatusPingPacket.h"
 
 namespace McProtocol {
-StatusPingPacket::StatusPingPacket() : Packet(0x01) {
+StatusPingPacket::StatusPingPacket() : Packet(0x01), pingTime(0) {
 }
 
-StatusPingPacket::~StatusPingPacket() noexcept {
-}
+StatusPingPacket::~StatusPingPacket() = default;
 
 void StatusPingPacket::write(EncodeStream *stream) {
   stream->writeInt64(pingTime);

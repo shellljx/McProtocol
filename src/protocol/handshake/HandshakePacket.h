@@ -9,13 +9,13 @@ namespace McProtocol {
 class HandshakePacket : public Packet{
  public:
   HandshakePacket();
-  ~HandshakePacket();
+  ~HandshakePacket() override;
 
-  void read(DecodeStream* stream);
-  void write(EncodeStream* stream);
+  void read(DecodeStream* stream) override;
+  void write(EncodeStream* stream) override;
 
  private:
-  int protocolVersion_ = 756;
+  int protocolVersion_ = 758;
   std::string serverAddr_ = "127.0.0.1";
   int16_t serverPort = 25565;
   int intent = 2;

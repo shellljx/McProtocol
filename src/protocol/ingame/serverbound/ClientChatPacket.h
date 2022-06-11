@@ -7,8 +7,8 @@
 namespace McProtocol {
 class ClientChatPacket : public Packet {
  public:
-  ClientChatPacket(const char *message);
-  ~ClientChatPacket();
+  explicit ClientChatPacket(const char *message);
+  ~ClientChatPacket() override;
 
   void read(DecodeStream *stream);
   void write(EncodeStream *stream);

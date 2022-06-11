@@ -5,11 +5,10 @@
 #include "ServerKeepAlivePacket.h"
 
 namespace McProtocol {
-ServerKeepAlivePacket::ServerKeepAlivePacket() : Packet(0x21) {
+ServerKeepAlivePacket::ServerKeepAlivePacket() : Packet(0x21), keepAliveId_(0) {
 }
 
-ServerKeepAlivePacket::~ServerKeepAlivePacket() noexcept {
-}
+ServerKeepAlivePacket::~ServerKeepAlivePacket() = default;
 
 void ServerKeepAlivePacket::write(EncodeStream *stream) {
 

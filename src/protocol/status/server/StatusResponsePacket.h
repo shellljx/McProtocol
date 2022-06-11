@@ -9,10 +9,10 @@ namespace McProtocol {
 class StatusResponsePacket : public Packet{
  public:
   StatusResponsePacket();
-  ~StatusResponsePacket();
+  ~StatusResponsePacket() override;
 
-  void read(DecodeStream* stream);
-  void write(EncodeStream* stream);
+  void read(DecodeStream* stream) override;
+  void write(EncodeStream* stream) override;
 
   std::string getInfo() const{
     return info;
