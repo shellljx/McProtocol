@@ -3,15 +3,15 @@
 //
 
 #pragma once
-#include "ChunkSection.h"
+#include "Section.h"
 #include <vector>
 
 namespace McProtocol {
-class ChunkColumn {
+class Column {
 
  private:
   int x;
   int z;
-  std::vector<std::unique_ptr<ChunkSection>> sections;
+  std::vector<std::unique_ptr<Section>> sections;
 };
 }

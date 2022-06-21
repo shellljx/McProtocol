@@ -4,7 +4,7 @@
 
 #pragma once
 #include "io/ReadWriteable.h"
-#include "bean/nbt/TagCompound.h"
+#include "model/nbt/TagCompound.h"
 
 namespace McProtocol {
 class BlockEntityInfo : public ReadWriteable {

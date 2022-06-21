@@ -9,6 +9,8 @@ link_directories("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw-3.3.7/lib-x86_64")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw-3.3.7/include")
 #stb
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/stb/include)
+#json
+include_directories("/usr/local/Cellar/nlohmann-json/3.10.5/include")
 #include source header
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable(socket
@@ -58,44 +60,49 @@ add_executable(socket
         src/protocol/ingame/serverbound/ClientStatusPacket.h
         src/protocol/ingame/serverbound/ClientChatPacket.cpp
         src/protocol/ingame/serverbound/ClientChatPacket.h
-        src/renderer/RendererManager.cpp
-        src/renderer/RendererManager.h
+        src/renderer/McRenderer.cpp
+        src/renderer/McRenderer.h
         src/renderer/ShaderLoader.h
         src/protocol/ingame/clientbound/chunk/ServerChunkDataPacket.cpp
         src/protocol/ingame/clientbound/chunk/ServerChunkDataPacket.h
-        src/bean/ChunkColumn.cpp src/bean/ChunkColumn.h
-        src/bean/ChunkSection.cpp src/bean/ChunkSection.h
-        src/bean/nbt/TagCompound.cpp src/bean/nbt/TagCompound.h
-        src/bean/nbt/Tag.cpp
-        src/bean/nbt/Tag.h
+        src/model/world/Column.cpp src/model/world/Column.h
+        src/model/world/Section.cpp src/model/world/Section.h
+        src/model/nbt/TagCompound.cpp src/model/nbt/TagCompound.h
+        src/model/nbt/Tag.cpp
+        src/model/nbt/Tag.h
         src/io/ReadWriteable.h
-        src/bean/nbt/TagByte.cpp
-        src/bean/nbt/TagByte.h
-        src/bean/nbt/TagShort.cpp
-        src/bean/nbt/TagShort.h
-        src/bean/nbt/TagInt.cpp
-        src/bean/nbt/TagInt.h
-        src/bean/nbt/TagLong.cpp
-        src/bean/nbt/TagLong.h
-        src/bean/nbt/TagFloat.cpp
-        src/bean/nbt/TagFloat.h
-        src/bean/nbt/TagDouble.cpp
-        src/bean/nbt/TagDouble.h
-        src/bean/nbt/TagByteArray.cpp
-        src/bean/nbt/TagByteArray.h
-        src/bean/nbt/TagString.cpp
-        src/bean/nbt/TagString.h
-        src/bean/nbt/TagList.cpp
-        src/bean/nbt/TagList.h
-        src/bean/nbt/TagIntArray.cpp
-        src/bean/nbt/TagIntArray.h
-        src/bean/nbt/TagLongArray.cpp
-        src/bean/nbt/TagLongArray.h
-        src/bean/BlockEntityInfo.cpp
-        src/bean/BlockEntityInfo.h
-        src/bean/LightUpdateData.cpp
-        src/bean/LightUpdateData.h
-        )
+        src/model/nbt/TagByte.cpp
+        src/model/nbt/TagByte.h
+        src/model/nbt/TagShort.cpp
+        src/model/nbt/TagShort.h
+        src/model/nbt/TagInt.cpp
+        src/model/nbt/TagInt.h
+        src/model/nbt/TagLong.cpp
+        src/model/nbt/TagLong.h
+        src/model/nbt/TagFloat.cpp
+        src/model/nbt/TagFloat.h
+        src/model/nbt/TagDouble.cpp
+        src/model/nbt/TagDouble.h
+        src/model/nbt/TagByteArray.cpp
+        src/model/nbt/TagByteArray.h
+        src/model/nbt/TagString.cpp
+        src/model/nbt/TagString.h
+        src/model/nbt/TagList.cpp
+        src/model/nbt/TagList.h
+        src/model/nbt/TagIntArray.cpp
+        src/model/nbt/TagIntArray.h
+        src/model/nbt/TagLongArray.cpp
+        src/model/nbt/TagLongArray.h
+        src/model/world/BlockEntityInfo.cpp
+        src/model/world/BlockEntityInfo.h
+        src/model/world/LightUpdateData.cpp
+        src/model/world/LightUpdateData.h
+        src/renderer/Model.cpp
+        src/renderer/Model.h
+        src/renderer/Face.cpp
+        src/renderer/Face.h
+        src/renderer/Atlas.h
+        src/renderer/Atlas.cpp src/renderer/AssetManager.cpp src/renderer/AssetManager.h src/renderer/file.h)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/openssl.cmake")
 target_link_libraries(${PROJECT_NAME} libglfw3.dylib)

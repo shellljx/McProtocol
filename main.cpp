@@ -8,7 +8,6 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <zlib.h>
-
 #include "src/io/ByteData.h"
 #include "src/io/EncodeStream.h"
 #include "src/io/DecodeStream.h"
@@ -20,13 +19,14 @@
 #include "src/protocol/status/server/StatusPongPacket.h"
 #include "src/protocol/login/server/LoginSuccess.h"
 #include "src/protocol/login/server/SetCompressionPacket.h"
-#include "src/protocol/ingame/client/ClientKeepAlivePacket.h"
-#include "src/protocol/ingame/server/ServerKeepAlivePacket.h"
-#include "src/protocol/ingame/client/ClientChatPacket.h"
+#include "src/protocol/ingame/serverbound/ClientKeepAlivePacket.h"
+#include "src/protocol/ingame/clientbound/ServerKeepAlivePacket.h"
+#include "src/protocol/ingame/serverbound/ClientChatPacket.h"
 #include "src/codec/EncryptionCodec.h"
 #include "src/codec/SizerCodec.h"
 #include "src/codec/CompressionCodec.h"
 #include "src/protocol/PacketFactory.h"
+#include "src/renderer/McRenderer.h"
 
 int client_socket;
 
@@ -46,6 +46,7 @@ bool enableCompression = false;
 int compressionThreshold;
 
 McProtocol::PacketFactory packetFactory;
+McRenderer::McRenderer rendererManager;
 
 void sendPacket(std::unique_ptr<McProtocol::Packet> packet) {
   if (packet == nullptr) {
@@ -58,7 +59,7 @@ void sendPacket(std::unique_ptr<McProtocol::Packet> packet) {
 bool a = true;
 void createClientBoundPacket(McProtocol::DecodeStream *stream) {
   int packetid = stream->readVarInt();
-  std::cout<<"packet: "<<packetid<<std::endl;
+  std::cout << "packet: " << packetid << std::endl;
   auto packet = packetFactory.createClientBoundPacket(packetid);
   if (packet == nullptr) {
     return;
@@ -66,23 +67,23 @@ void createClientBoundPacket(McProtocol::DecodeStream *stream) {
   packet->read(stream);
 
   if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::LOGIN) {
-    if (packetid == 3){
+    if (packetid == 3) {
       auto p = reinterpret_cast<McProtocol::SetCompressionPacket *>(packet.get());
       enableCompression = true;
       compressionCodec.setEnable(true);
       compressionThreshold = p->getCompressionThreshold();
-    } else if (packetid == 2){
+    } else if (packetid == 2) {
       packetFactory.setProtocolStatus(McProtocol::ProtocolStatus::INGAME);
     }
   }
 
   if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::INGAME) {
-    auto livep = reinterpret_cast<McProtocol::ServerKeepAlivePacket*>(packet.get());
-    if (packetid == 0x21){
+    auto livep = reinterpret_cast<McProtocol::ServerKeepAlivePacket *>(packet.get());
+    if (packetid == 0x21) {
       auto op = std::unique_ptr<McProtocol::ClientKeepAlivePacket>(new McProtocol::ClientKeepAlivePacket);
       op->setKeepAliveId(livep->getKeepAliveId());
       sendPacket(std::move(op));
-      if (a){
+      if (a) {
         sendPacket(packetFactory.createServerBoundPacket(0x04));
         sendPacket(std::unique_ptr<McProtocol::Packet>(new McProtocol::ClientChatPacket("hello world i am a robot")));
         a = false;
@@ -269,23 +270,17 @@ void PackageThread() {
 
 int main() {
 
-  std::cout << "start" << std::endl;
-  std::thread thread_read = std::thread(&ReadThread);
-  std::thread thread_write = std::thread(&SendThread);
-  std::thread thread_package = std::thread(&PackageThread);
+//  std::cout << "start" << std::endl;
+//  std::thread thread_read = std::thread(&ReadThread);
+//  std::thread thread_write = std::thread(&SendThread);
+//  std::thread thread_package = std::thread(&PackageThread);
 
-  if (thread_read.joinable()) {
-    thread_read.join();
-  }
+  std::vector<std::string> paths;
+  McRenderer::McRenderer mc_renderer;
+  mc_renderer.run();
 
-  if (thread_write.joinable()) {
-    thread_write.join();
-  }
-
-  if (thread_package.joinable()) {
-    thread_package.join();
-  }
-  //============
-
+//  thread_read.detach();
+//  thread_package.detach();
+//  thread_write.detach();
   return 0;
 }

@@ -5,9 +5,9 @@
 #pragma once
 #include <vector>
 #include "../../../Packet.h"
-#include "../../../../bean/nbt/TagCompound.h"
-#include "bean/BlockEntityInfo.h"
-#include "bean/LightUpdateData.h"
+#include "model/nbt/TagCompound.h"
+#include "model/world/BlockEntityInfo.h"
+#include "model/world/LightUpdateData.h"
 
 namespace McProtocol {
 class ServerChunkDataPacket : public Packet {

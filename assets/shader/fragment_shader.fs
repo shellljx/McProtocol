@@ -10,4 +10,7 @@ void main()
 {
 	// linearly interpolate between both textures (80% container, 20% awesomeface)
 	FragColor = texture(texture1, TexCoord);
+	if(FragColor.a < 0.1){
+	    discard;
+	}
 }

@@ -3,7 +3,7 @@
 //
 
 #include "ServerChunkDataPacket.h"
-#include "../../../../bean/nbt/Tag.h"
+#include "model/nbt/Tag.h"
 namespace McProtocol {
 ServerChunkDataPacket::ServerChunkDataPacket() : Packet(0x21), x_(0), z_(0) {
 }

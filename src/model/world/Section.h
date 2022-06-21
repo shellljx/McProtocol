@@ -5,7 +5,7 @@
 #pragma once
 
 namespace McProtocol {
-class ChunkSection {
+class Section {
 
 };
 }
