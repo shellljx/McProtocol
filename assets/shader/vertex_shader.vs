@@ -15,13 +15,13 @@ void main()
 {
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 	if(gl_VertexID==1||gl_VertexID==6){
-	TexCoord = vec2(texture_coords[0], texture_coords[1]);
-	}else if(gl_VertexID==2){
-	TexCoord = vec2(texture_coords[2],texture_coords[3]);
-	} else if (gl_VertexID==3||gl_VertexID==4){
 	TexCoord = vec2(texture_coords[0],texture_coords[3]);
-	}else{
+	}else if(gl_VertexID==2){
 	TexCoord = vec2(texture_coords[2], texture_coords[1]);
+	} else if (gl_VertexID==3||gl_VertexID==4){
+	TexCoord = vec2(texture_coords[0], texture_coords[1]);
+	}else{
+	TexCoord = vec2(texture_coords[2],texture_coords[3]);
 	}
 
 }
