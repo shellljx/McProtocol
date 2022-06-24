@@ -83,7 +83,7 @@ int McRenderer::run() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-  GLFWwindow *window = glfwCreateWindow(800, 500, "McRender", nullptr, nullptr);
+  GLFWwindow *window = glfwCreateWindow(800, 500, "McRenderer", nullptr, nullptr);
   if (!window) {
     glfwTerminate();
     return -1;
