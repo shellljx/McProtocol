@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <string>
 
 namespace McRenderer {
 class AssetManager {
@@ -10,7 +11,9 @@ class AssetManager {
   AssetManager();
   ~AssetManager();
 
+  static std::string getAssetDirPath();
   const unsigned char * getData();
+
  private:
   unsigned char* data = nullptr;
 };

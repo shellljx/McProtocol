@@ -97,12 +97,12 @@ add_executable(socket
         src/model/world/BlockEntityInfo.h
         src/model/world/LightUpdateData.cpp
         src/model/world/LightUpdateData.h
-        src/renderer/Model.cpp
-        src/renderer/Model.h
+        src/renderer/model/Model.cpp
+        src/renderer/model/Model.h
         src/renderer/Face.cpp
         src/renderer/Face.h
         src/renderer/Atlas.h
-        src/renderer/Atlas.cpp src/renderer/AssetManager.cpp src/renderer/AssetManager.h src/renderer/file.h)
+        src/renderer/Atlas.cpp src/renderer/AssetManager.cpp src/renderer/AssetManager.h src/renderer/file.h src/renderer/core/Box.h src/renderer/model/Element.cpp src/renderer/model/Element.h src/renderer/model/FaceInfo.cpp src/renderer/model/FaceInfo.h)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/openssl.cmake")
 target_link_libraries(${PROJECT_NAME} libglfw3.dylib)

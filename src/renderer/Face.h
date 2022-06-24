@@ -6,15 +6,17 @@
 #include <array>
 #include <vector>
 #include "file.h"
+#include "renderer/model/FaceInfo.h"
 
-namespace McRenderer{
+namespace McRenderer {
 class Face {
  public:
-  explicit Face(const Orientation orientation,const std::vector<float> textures);
   ~Face();
 
- public:
   static const std::vector<float> botoom_face;
+  static Face Create(Point3D from, Point3D to, FaceInfo *info);
+ private:
+  explicit Face(const float *matrix, const std::vector<float> textures);
  private:
   //model matrix 16 floats
   std::array<float, 16> modelMatrix_;

@@ -3,15 +3,13 @@
 //
 
 #include "AssetManager.h"
-#include "nlohmann/json.hpp"
-#include <fstream>
+#include <vector>
 #include "Atlas.h"
-#include <iostream>
 #include <dirent.h>
-#include <sys/types.h>
 
 namespace McRenderer {
 AssetManager::AssetManager() {
+
   std::vector<std::string> paths;
   DIR *dr;
   struct dirent *en;
@@ -37,5 +35,9 @@ AssetManager::~AssetManager() {
 
 const unsigned char *AssetManager::getData() {
   return data;
+}
+
+std::string AssetManager::getAssetDirPath() {
+  return "/Users/lijinxiang/CLionProjects/minecraft/socket/assets/1.18.2/assets";
 }
 }

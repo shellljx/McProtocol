@@ -11,6 +11,7 @@
 #include "Face.h"
 #include "Atlas.h"
 #include "AssetManager.h"
+#include "renderer/model/Model.h"
 
 namespace McRenderer {
 
@@ -176,13 +177,9 @@ int McRenderer::run() {
 //      glm::vec3(4.0f, 6.0f, -2.0f)
   };
 
-  std::vector<Face> faces;
-  faces.push_back(Face(Orientation::Bottom,{1,1,2,2}));
-  faces.push_back(Face(Orientation::Top,{8,8,9,9}));
-  faces.push_back(Face(Orientation::East,{5,5,6,6}));
-  faces.push_back(Face(Orientation::West,{7,7,8,8}));
-  faces.push_back(Face(Orientation::North,{9,9,10,10}));
-  faces.push_back(Face(Orientation::South,{27,6,28,7}));
+  auto model = Model::MakeBlockWithName("torch");
+
+  auto faces = model->generateFaces();
 
   GLuint vbo, dataVbo, vao;
   glGenVertexArrays(1, &vao);
@@ -201,24 +198,24 @@ int McRenderer::run() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(Face) * faces.size(), faces.data(), GL_STATIC_DRAW);
 
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1,4,GL_FLOAT, GL_FALSE, sizeof(Face), (void*)0);
-  glVertexAttribDivisor(1,1);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void *) 0);
+  glVertexAttribDivisor(1, 1);
 
   glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void*)(4*sizeof(float)));
-  glVertexAttribDivisor(2,1);
+  glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void *) (4 * sizeof(float)));
+  glVertexAttribDivisor(2, 1);
 
   glEnableVertexAttribArray(3);
-  glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void*)(8*sizeof(float)));
-  glVertexAttribDivisor(3,1);
+  glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void *) (8 * sizeof(float)));
+  glVertexAttribDivisor(3, 1);
 
   glEnableVertexAttribArray(4);
-  glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void*)(12 * sizeof(float)));
+  glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void *) (12 * sizeof(float)));
   //Specify that only one instance of this must be sent to one index
   glVertexAttribDivisor(4, 1);
 
   glEnableVertexAttribArray(5);
-  glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void*)(16 * sizeof(float)));
+  glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Face), (void *) (16 * sizeof(float)));
   //Specify that only one instance of this must be sent to one index
   glVertexAttribDivisor(5, 1);
 
