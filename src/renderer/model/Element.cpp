@@ -3,6 +3,8 @@
 //
 
 #include "Element.h"
+
+#include <memory>
 namespace McRenderer {
 Element::Element(const nlohmann::json &json) {
   if (json.contains("from")) {
@@ -20,7 +22,7 @@ Element::Element(const nlohmann::json &json) {
       if (orientation == Orientation::None) {
         continue;
       }
-      faces_.push_back(std::unique_ptr<FaceInfo>(new FaceInfo(orientation, item.value())));
+      faces_.push_back(std::make_unique<FaceInfo>(orientation, item.value()));
     }
   }
 }

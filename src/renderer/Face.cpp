@@ -6,16 +6,26 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "AssetManager.h"
 
 namespace McRenderer {
-Face::Face(const float *matrix, const std::vector<float> textures) {
+Face::Face(const float *matrix, const FaceInfo *info) {
   for (int i = 0; i < 16; ++i) {
     modelMatrix_[i] = matrix[i];
   }
 
-  for (int i = 0; i < 4; i++) {
-    textureCoords_[i] = textures[i] * 0.03125;
-  }
+  auto atlas = AssetManager::getInstance().getAtlas();
+  auto texture = atlas->getTexture(info->getTexture());
+  auto u1 = (texture->getLocation().x + info->getUvStart().x) / atlas->getWidth() + 0.0002;
+  auto v1 = (texture->getLocation().y + info->getUvStart().y) / atlas->getHeight() + 0.0002;
+
+  auto u2 = (texture->getLocation().x + info->getUvEnd().x) / atlas->getWidth() - 0.0002;
+  auto v2 = (texture->getLocation().y + info->getUvEnd().y) / atlas->getHeight() - 0.0002;
+
+  textureCoords_[0] = u1;
+  textureCoords_[1] = v1;
+  textureCoords_[2] = u2;
+  textureCoords_[3] = v2;
 }
 
 Face::~Face() {
@@ -30,7 +40,7 @@ const std::vector<float> Face::botoom_face = {
     1.0f, -1.0f, 1.0f
 };
 
-Face Face::Create(Point3D from, Point3D to, FaceInfo *info) {
+Face Face::Create(Point3D from, Point3D to, const FaceInfo *info) {
   glm::mat4 model = glm::mat4(1.0);
 
   model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
@@ -57,9 +67,6 @@ Face Face::Create(Point3D from, Point3D to, FaceInfo *info) {
     case Orientation::None:break;
   }
   const float *model_ptr = glm::value_ptr(model);
-  if (info->getOrientation() == Orientation::Top) {
-    return Face(model_ptr, {27.4375, 6.375, 27.5625, 6.5});
-  }
-  return Face(model_ptr, {27.0002, 6.0002, 28 - 0.0002, 7 - 0.0002});
+  return Face(model_ptr, info);
 }
 }

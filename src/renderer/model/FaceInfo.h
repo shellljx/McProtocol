@@ -13,14 +13,27 @@ class FaceInfo {
   ~FaceInfo();
 
   void replaceTexture(const std::string &key, const std::string &texture);
-  Orientation getOrientation() {
+
+  [[nodiscard]] Orientation getOrientation() const {
     return orientation_;
+  }
+
+  [[nodiscard]] std::string getTexture() const {
+    return texture_;
+  }
+
+  PointF getUvStart() const {
+    return uvStart_;
+  }
+
+  PointF getUvEnd() const {
+    return uvEnd_;
   }
 
  private:
   Orientation orientation_ = Orientation::None;
-  Point uvStart_{};
-  Point uvEnd_{};
+  PointF uvStart_{};
+  PointF uvEnd_{};
   std::string texture_;
 };
 }

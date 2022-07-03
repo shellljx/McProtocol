@@ -3,12 +3,14 @@
 //
 
 #include "AssetManager.h"
+#include <memory>
 #include <vector>
 #include "Atlas.h"
 #include <dirent.h>
 
 namespace McRenderer {
 AssetManager::AssetManager() {
+  atlas_ = std::make_unique<Atlas>();
 
   std::vector<std::string> paths;
   DIR *dr;
@@ -26,15 +28,15 @@ AssetManager::AssetManager() {
     closedir(dr); //close all directory
   }
 
-  data = pack2DTexture(paths, true);
+  atlas_->pack2DTexture(paths, true);
 }
 
 AssetManager::~AssetManager() {
-  delete[] data;
 }
 
-const unsigned char *AssetManager::getData() {
-  return data;
+AssetManager &AssetManager::getInstance() {
+  static AssetManager instance;
+  return instance;
 }
 
 std::string AssetManager::getAssetDirPath() {

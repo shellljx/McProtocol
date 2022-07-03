@@ -4,6 +4,7 @@
 
 #include "Model.h"
 #include "renderer/AssetManager.h"
+#include <memory>
 #include <nlohmann/json.hpp>
 #include <fstream>
 
@@ -38,14 +39,16 @@ void Model::ParseModelFromJson(Model *model, Type type, const char *name) {
 
   if (modelJson.contains("elements")) {
     for (auto &json : modelJson.at("elements")) {
-      model->elements_.push_back(std::unique_ptr<Element>(new Element(json)));
+      model->elements_.push_back(std::make_unique<Element>(json));
     }
   }
 
   if (modelJson.contains("textures")) {
     for (const auto &item : modelJson.at("textures").items()) {
+      const auto &key = item.key();
+      auto value = item.value().get<std::string>();
       for (auto &element : model->elements_) {
-        element->replaceTexture(item.key(), item.value().get<std::string>());
+        element->replaceTexture(key, value);
       }
     }
   }

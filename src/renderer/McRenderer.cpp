@@ -102,52 +102,6 @@ int McRenderer::run() {
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
 
-  float x = 12, y = 12;
-  float per = 0.03125;
-
-  float vertices[] = {
-      -1.0f, -1.0f, -1.0f, x * per, y * per,
-      1.0f, -1.0f, -1.0f, (1 + x) * per, y * per,
-      1.0f, 1.0f, -1.0f, (1 + x) * per, (1 + y) * per,
-      1.0f, 1.0f, -1.0f, (1 + x) * per, (1 + y) * per,
-      -1.0f, 1.0f, -1.0f, x * per, (1 + y) * per,
-      -1.0f, -1.0f, -1.0f, x * per, y * per,
-
-      -1.0f, -1.0f, 1.0f, x * per, y * per,
-      1.0f, -1.0f, 1.0f, (1 + x) * per, y * per,
-      1.0f, 1.0f, 1.0f, (1 + x) * per, (1 + y) * per,
-      1.0f, 1.0f, 1.0f, (1 + x) * per, (1 + y) * per,
-      -1.0f, 1.0f, 1.0f, x * per, (1 + y) * per,
-      -1.0f, -1.0f, 1.0f, x * per, y * per,
-
-      -1.0f, 1.0f, 1.0f, (1 + x) * per, y * per,
-      -1.0f, 1.0f, -1.0f, (1 + x) * per, (1 + y) * per,
-      -1.0f, -1.0f, -1.0f, x * per, (1 + y) * per,
-      -1.0f, -1.0f, -1.0f, x * per, (1 + y) * per,
-      -1.0f, -1.0f, 1.0f, x * per, y * per,
-      -1.0f, 1.0f, 1.0f, (1 + x) * per, y * per,
-
-      1.0f, 1.0f, 1.0f, (1 + x) * per, y * per,
-      1.0f, 1.0f, -1.0f, (1 + x) * per, (1 + y) * per,
-      1.0f, -1.0f, -1.0f, x * per, (1 + y) * per,
-      1.0f, -1.0f, -1.0f, x * per, (1 + y) * per,
-      1.0f, -1.0f, 1.0f, x * per, y * per,
-      1.0f, 1.0f, 1.0f, (1 + x) * per, y * per,
-
-      -1.0f, -1.0f, -1.0f, x * per, (1 + y) * per,
-      1.0f, -1.0f, -1.0f, (1 + x) * per, (1 + y) * per,
-      1.0f, -1.0f, 1.0f, (1 + x) * per, y * per,
-      1.0f, -1.0f, 1.0f, (1 + x) * per, y * per,
-      -1.0f, -1.0f, 1.0f, x * per, y * per,
-      -1.0f, -1.0f, -1.0f, x * per, (1 + y) * per,
-
-      -1.0f, 1.0f, -1.0f, x * per, (1 + y) * per,
-      1.0f, 1.0f, -1.0f, (1 + x) * per, (1 + y) * per,
-      1.0f, 1.0f, 1.0f, (1 + x) * per, y * per,
-      1.0f, 1.0f, 1.0f, (1 + x) * per, y * per,
-      -1.0f, 1.0f, 1.0f, x * per, y * per,
-      -1.0f, 1.0f, -1.0f, x * per, (1 + y) * per
-  };
   // world space positions of our cubes
   glm::vec3 cubePositions[] = {
       glm::vec3(0.0f, 0.0f, 0.0f),
@@ -177,7 +131,7 @@ int McRenderer::run() {
 //      glm::vec3(4.0f, 6.0f, -2.0f)
   };
 
-  auto model = Model::MakeBlockWithName("torch");
+  auto model = Model::MakeBlockWithName("jungle_log");
 
   auto faces = model->generateFaces();
 
@@ -232,9 +186,9 @@ int McRenderer::run() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  AssetManager asset_manager;
-  if (asset_manager.getData()) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, asset_manager.getData());
+  auto atlas = AssetManager::getInstance().getAtlas();
+  if (atlas->getDatas()) {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->getWidth(), atlas->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas->getDatas());
     glGenerateMipmap(GL_TEXTURE_2D);
   } else {
     return -1;

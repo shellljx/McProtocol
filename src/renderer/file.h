@@ -15,9 +15,14 @@ enum class Orientation {
   Top //y = 1
 };
 
-typedef struct Point {
+typedef struct PointF {
   float x;
   float y;
+} PointF;
+
+typedef struct Point {
+  int x;
+  int y;
 } Point;
 
 typedef struct Point3D {
@@ -25,6 +30,13 @@ typedef struct Point3D {
   float y;
   float z;
 } Point3D;
+
+typedef struct Rect {
+  float x;
+  float y;
+  float w;
+  float h;
+} Rect;
 
 static Orientation GetOrientation(const char *orientation) {
   if (!strcmp(orientation, "south")) {

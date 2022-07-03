@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <string>
+#include "Atlas.h"
 
 namespace McRenderer {
 class AssetManager {
@@ -12,10 +12,14 @@ class AssetManager {
   ~AssetManager();
 
   static std::string getAssetDirPath();
-  const unsigned char * getData();
+  static AssetManager& getInstance();
+
+  std::shared_ptr<Atlas> getAtlas(){
+    return atlas_;
+  }
 
  private:
-  unsigned char* data = nullptr;
+  std::shared_ptr<Atlas> atlas_ = nullptr;
 };
 }
 

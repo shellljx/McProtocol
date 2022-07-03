@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(socket)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-framework Cocoa -framework OpenGL -framework IOKit")
 
 #glfw
@@ -11,6 +11,8 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw-3.3.7/include")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/stb/include)
 #json
 include_directories("/usr/local/Cellar/nlohmann-json/3.10.5/include")
+#rectpack2d
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/rectpack2D/src")
 #include source header
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable(socket
@@ -102,7 +104,7 @@ add_executable(socket
         src/renderer/Face.cpp
         src/renderer/Face.h
         src/renderer/Atlas.h
-        src/renderer/Atlas.cpp src/renderer/AssetManager.cpp src/renderer/AssetManager.h src/renderer/file.h src/renderer/core/Box.h src/renderer/model/Element.cpp src/renderer/model/Element.h src/renderer/model/FaceInfo.cpp src/renderer/model/FaceInfo.h)
+        src/renderer/Atlas.cpp src/renderer/AssetManager.cpp src/renderer/AssetManager.h src/renderer/file.h src/renderer/core/Box.h src/renderer/model/Element.cpp src/renderer/model/Element.h src/renderer/model/FaceInfo.cpp src/renderer/model/FaceInfo.h src/renderer/Texture.cpp src/renderer/Texture.h)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/openssl.cmake")
 target_link_libraries(${PROJECT_NAME} libglfw3.dylib)
