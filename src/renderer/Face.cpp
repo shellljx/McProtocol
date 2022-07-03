@@ -40,9 +40,10 @@ const std::vector<float> Face::botoom_face = {
     1.0f, -1.0f, 1.0f
 };
 
-Face Face::Create(Point3D from, Point3D to, const FaceInfo *info) {
+Face Face::Create(Point3D location, Point3DF from, Point3DF to, const FaceInfo *info) {
   glm::mat4 model = glm::mat4(1.0);
 
+  model = glm::translate(model, glm::vec3(location.x, location.y, location.z));
   model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
   if (to.y < 16) {
     model = glm::translate(model, glm::vec3(0.0f, (to.y - 16) / 16.f, 0.0f));

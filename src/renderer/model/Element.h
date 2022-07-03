@@ -16,11 +16,11 @@ class Element {
 
   void replaceTexture(const std::string &key, const std::string &texture);
 
-  Point3D getFrom() {
+  Point3DF getFrom() {
     return from_;
   }
 
-  Point3D getTo() {
+  Point3DF getTo() {
     return to_;
   }
 
@@ -29,8 +29,8 @@ class Element {
   }
 
  private:
-  Point3D from_{};
-  Point3D to_{};
+  Point3DF from_{};
+  Point3DF to_{};
   std::vector<std::shared_ptr<FaceInfo>> faces_;
 };
 }

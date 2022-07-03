@@ -66,11 +66,11 @@ std::unique_ptr<Model> Model::MakeItemWithName(const char *name) {
   return std::unique_ptr<Model>(model);
 }
 
-std::vector<Face> Model::generateFaces() {
+std::vector<Face> Model::generateFaces(Point3D location) {
   std::vector<Face> faces;
   for (auto &element: elements_) {
     for (auto &info : element->getFaces()) {
-      faces.push_back(Face::Create(element->getFrom(), element->getTo(), info.get()));
+      faces.push_back(Face::Create(location, element->getFrom(), element->getTo(), info.get()));
     }
   }
   return faces;

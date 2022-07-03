@@ -103,37 +103,19 @@ int McRenderer::run() {
   // ------------------------------------------------------------------
 
   // world space positions of our cubes
-  glm::vec3 cubePositions[] = {
-      glm::vec3(0.0f, 0.0f, 0.0f),
-//      glm::vec3(0.0f, 2.0f, 0.0f),
-//      glm::vec3(0.0f, 4.0f, 0.0f),
-//      glm::vec3(0.0f, 6.0f, 0.0f),
-//      glm::vec3(2.0f, 0.0f, 0.0f),
-//      glm::vec3(2.0f, 2.0f, 0.0f),
-//      glm::vec3(2.0f, 4.0f, 0.0f),
-//      glm::vec3(2.0f, 6.0f, 0.0f),
-//      glm::vec3(4.0f, 0.0f, 0.0f),
-//      glm::vec3(4.0f, 2.0f, 0.0f),
-//      glm::vec3(4.0f, 4.0f, 0.0f),
-//      glm::vec3(4.0f, 6.0f, 0.0f),
-//
-//      glm::vec3(0.0f, 0.0f, -2.0f),
-//      glm::vec3(0.0f, 2.0f, -2.0f),
-//      glm::vec3(0.0f, 4.0f, -2.0f),
-//      glm::vec3(0.0f, 6.0f, -2.0f),
-//      glm::vec3(2.0f, 0.0f, -2.0f),
-//      glm::vec3(2.0f, 2.0f, -2.0f),
-//      glm::vec3(2.0f, 4.0f, -2.0f),
-//      glm::vec3(2.0f, 6.0f, -2.0f),
-//      glm::vec3(4.0f, 0.0f, -2.0f),
-//      glm::vec3(4.0f, 2.0f, -2.0f),
-//      glm::vec3(4.0f, 4.0f, -2.0f),
-//      glm::vec3(4.0f, 6.0f, -2.0f)
+  Point3D cubePositions[] = {
+      Point3D{0, 0, 0},
+      Point3D{1, 0, 0},
   };
 
-  auto model = Model::MakeBlockWithName("jungle_log");
-
-  auto faces = model->generateFaces();
+  auto model = Model::MakeBlockWithName("tnt");
+  std::vector<Face> faces;
+  for (int i = 0; i <100; ++i) {
+    for (int j = 0; j < 100; ++j) {
+      auto v = model->generateFaces(Point3D{i,0,j});
+      faces.insert(faces.end(), v.begin(), v.end());
+    }
+  }
 
   GLuint vbo, dataVbo, vao;
   glGenVertexArrays(1, &vao);
@@ -188,7 +170,15 @@ int McRenderer::run() {
 
   auto atlas = AssetManager::getInstance().getAtlas();
   if (atlas->getDatas()) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->getWidth(), atlas->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas->getDatas());
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA,
+                 atlas->getWidth(),
+                 atlas->getHeight(),
+                 0,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 atlas->getDatas());
     glGenerateMipmap(GL_TEXTURE_2D);
   } else {
     return -1;

@@ -25,10 +25,16 @@ typedef struct Point {
   int y;
 } Point;
 
-typedef struct Point3D {
+typedef struct Point3DF {
   float x;
   float y;
   float z;
+} Point3DF;
+
+typedef struct Point3D {
+  int x;
+  int y;
+  int z;
 } Point3D;
 
 typedef struct Rect {

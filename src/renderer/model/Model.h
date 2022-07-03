@@ -21,7 +21,7 @@ class Model {
   static std::unique_ptr<Model> MakeBlockWithName(const char *name);
   static std::unique_ptr<Model> MakeItemWithName(const char *name);
 
-  std::vector<Face> generateFaces();
+  std::vector<Face> generateFaces(Point3D location);
 
  private:
   static void ParseModelFromJson(Model *model, Type type, const char *name);

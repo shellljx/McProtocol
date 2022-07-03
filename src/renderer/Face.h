@@ -14,9 +14,9 @@ class Face {
   ~Face();
 
   static const std::vector<float> botoom_face;
-  static Face Create(Point3D from, Point3D to, const FaceInfo *info);
+  static Face Create(Point3D location, Point3DF from, Point3DF to, const FaceInfo *info);
  private:
-  explicit Face(const float *matrix, const FaceInfo* info);
+  explicit Face(const float *matrix, const FaceInfo *info);
  private:
   //model matrix 16 floats
   std::array<float, 16> modelMatrix_;
