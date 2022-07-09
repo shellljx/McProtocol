@@ -22,6 +22,7 @@
 #include "src/protocol/ingame/serverbound/ClientKeepAlivePacket.h"
 #include "src/protocol/ingame/clientbound/ServerKeepAlivePacket.h"
 #include "src/protocol/ingame/serverbound/ClientChatPacket.h"
+#include "protocol/ingame/clientbound/chunk/ServerChunkDataPacket.h"
 #include "src/codec/EncryptionCodec.h"
 #include "src/codec/SizerCodec.h"
 #include "src/codec/CompressionCodec.h"
@@ -46,7 +47,7 @@ bool enableCompression = false;
 int compressionThreshold;
 
 McProtocol::PacketFactory packetFactory;
-McRenderer::McRenderer rendererManager;
+McRenderer::McRenderer mc_renderer;
 
 void sendPacket(std::unique_ptr<McProtocol::Packet> packet) {
   if (packet == nullptr) {
@@ -59,7 +60,7 @@ void sendPacket(std::unique_ptr<McProtocol::Packet> packet) {
 bool a = true;
 void createClientBoundPacket(McProtocol::DecodeStream *stream) {
   int packetid = stream->readVarInt();
-  std::cout << "packet: " << packetid << std::endl;
+  //std::cout << "packet: " << packetid << std::endl;
   auto packet = packetFactory.createClientBoundPacket(packetid);
   if (packet == nullptr) {
     return;
@@ -72,12 +73,10 @@ void createClientBoundPacket(McProtocol::DecodeStream *stream) {
       enableCompression = true;
       compressionCodec.setEnable(true);
       compressionThreshold = p->getCompressionThreshold();
-    } else if (packetid == 2) {
-      packetFactory.setProtocolStatus(McProtocol::ProtocolStatus::INGAME);
     }
   }
 
-  if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::INGAME) {
+  if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::PLAY) {
     auto livep = reinterpret_cast<McProtocol::ServerKeepAlivePacket *>(packet.get());
     if (packetid == 0x21) {
       auto op = std::unique_ptr<McProtocol::ClientKeepAlivePacket>(new McProtocol::ClientKeepAlivePacket);
@@ -259,6 +258,12 @@ void PackageThread() {
       if (packet->getPacketId() == 0x02) {
         auto p = reinterpret_cast<McProtocol::LoginSuccessPacket *>(packet.get());
         std::cout << "name: " << p->getUserName() << " UUID: " << p->getUUID() << std::endl;
+        packetFactory.setProtocolStatus(McProtocol::ProtocolStatus::PLAY);
+      }
+    } else if (packetFactory.getProtocolStatus() == McProtocol::ProtocolStatus::PLAY){
+      if (packet->getPacketId() == 0x22){
+        auto p = reinterpret_cast<McProtocol::ServerChunkDataPacket*>(packet.get());
+        mc_renderer.setData(p,p->getX(), p->getZ());
       }
     }
 
@@ -271,16 +276,16 @@ void PackageThread() {
 int main() {
 
 //  std::cout << "start" << std::endl;
-//  std::thread thread_read = std::thread(&ReadThread);
-//  std::thread thread_write = std::thread(&SendThread);
-//  std::thread thread_package = std::thread(&PackageThread);
+  std::thread thread_read = std::thread(&ReadThread);
+  std::thread thread_write = std::thread(&SendThread);
+  std::thread thread_package = std::thread(&PackageThread);
 
   std::vector<std::string> paths;
-  McRenderer::McRenderer mc_renderer;
+
   mc_renderer.run();
 
-//  thread_read.detach();
-//  thread_package.detach();
-//  thread_write.detach();
+  thread_read.detach();
+  thread_package.detach();
+  thread_write.detach();
   return 0;
 }

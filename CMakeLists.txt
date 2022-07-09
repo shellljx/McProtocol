@@ -15,6 +15,8 @@ include_directories("/usr/local/Cellar/nlohmann-json/3.10.5/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/rectpack2D/src")
 #include source header
 include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/src/renderer)
+include_directories(${CMAKE_SOURCE_DIR}/src/model/nbt)
 add_executable(socket
         main.cpp
         src/io/ByteData.cpp
@@ -104,7 +106,7 @@ add_executable(socket
         src/renderer/Face.cpp
         src/renderer/Face.h
         src/renderer/Atlas.h
-        src/renderer/Atlas.cpp src/renderer/AssetManager.cpp src/renderer/AssetManager.h src/renderer/file.h src/renderer/core/Box.h src/renderer/model/Element.cpp src/renderer/model/Element.h src/renderer/model/FaceInfo.cpp src/renderer/model/FaceInfo.h src/renderer/Texture.cpp src/renderer/Texture.h)
+        src/renderer/Atlas.cpp src/renderer/AssetManager.cpp src/renderer/AssetManager.h src/renderer/file.h src/renderer/core/Box.h src/renderer/model/Element.cpp src/renderer/model/Element.h src/renderer/model/FaceInfo.cpp src/renderer/model/FaceInfo.h src/renderer/Texture.cpp src/renderer/Texture.h src/renderer/BlockStates.cpp src/renderer/BlockStates.h src/model/world/Wrold.cpp src/model/world/Wrold.h)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/openssl.cmake")
 target_link_libraries(${PROJECT_NAME} libglfw3.dylib)

@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "glm/vec4.hpp"
+#include "protocol/ingame/clientbound/chunk/ServerChunkDataPacket.h"
+#include "Face.h"
 
 namespace McRenderer{
 class McRenderer {
@@ -14,8 +16,12 @@ class McRenderer {
   ~McRenderer();
 
   int run();
+  void setData(const McProtocol::ServerChunkDataPacket* packet, int x, int z);
 
  private:
   void processInput(GLFWwindow* window);
+
+ private:
+  std::vector<Face> faces_;
 };
 }

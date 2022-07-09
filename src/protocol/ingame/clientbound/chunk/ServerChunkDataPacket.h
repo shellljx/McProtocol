@@ -18,6 +18,18 @@ class ServerChunkDataPacket : public Packet {
   void read(DecodeStream *stream) override;
   void write(EncodeStream *stream) override;
 
+  DecodeStream getChunkData() const {
+    return DecodeStream(chunkData_->data(), chunkData_->length());
+  }
+
+  int getX() const{
+    return x_;
+  }
+
+  int getZ() const{
+    return z_;
+  }
+
  private:
   int x_;
   int z_;

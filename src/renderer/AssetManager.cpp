@@ -7,6 +7,8 @@
 #include <vector>
 #include "Atlas.h"
 #include <dirent.h>
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 namespace McRenderer {
 AssetManager::AssetManager() {
@@ -29,6 +31,22 @@ AssetManager::AssetManager() {
   }
 
   atlas_->pack2DTexture(paths, true);
+
+  //load block states
+  auto blockspath = "/Users/lijinxiang/CLionProjects/minecraft/socket/assets/1.18.2/assets/minecraft/blocks.json";
+  std::ifstream blockstream(blockspath);
+  nlohmann::json statesJson = nlohmann::json::parse(blockstream);
+  for(auto& state : statesJson.items()){
+    auto key = state.key();
+    auto value = state.value();
+
+    auto name = key.substr(10, key.length());
+    auto statepath = "/Users/lijinxiang/CLionProjects/minecraft/socket/assets/1.18.2/assets/minecraft/blockstates/"+name+".json";
+
+    std::ifstream stateStream(statepath);
+    nlohmann::json json = nlohmann::json::parse(stateStream);
+
+  }
 }
 
 AssetManager::~AssetManager() {

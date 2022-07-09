@@ -3,9 +3,12 @@
 //
 
 #include "ServerChunkDataPacket.h"
-#include "model/nbt/Tag.h"
+
+#include <memory>
+#include "Tag.h"
+
 namespace McProtocol {
-ServerChunkDataPacket::ServerChunkDataPacket() : Packet(0x21), x_(0), z_(0) {
+ServerChunkDataPacket::ServerChunkDataPacket() : Packet(0x22), x_(0), z_(0) {
 }
 
 ServerChunkDataPacket::~ServerChunkDataPacket() = default;
@@ -28,10 +31,10 @@ void ServerChunkDataPacket::read(DecodeStream *stream) {
   const int num_entities = stream->readVarInt();
   blockEntities_ = std::vector<std::unique_ptr<BlockEntityInfo>>(num_entities);
   for (int i = 0; i < num_entities; ++i) {
-    blockEntities_[i] = std::unique_ptr<BlockEntityInfo>(new BlockEntityInfo);
+    blockEntities_[i] = std::make_unique<BlockEntityInfo>();
     blockEntities_[i]->read(stream);
   }
-  lightUpdateData_ = std::unique_ptr<LightUpdateData>(new LightUpdateData);
+  lightUpdateData_ = std::make_unique<LightUpdateData>();
   lightUpdateData_->read(stream);
 }
 }

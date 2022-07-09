@@ -43,7 +43,7 @@ std::unique_ptr<Packet> PacketFactory::createServerBoundPacket(int id) {
       case 0x00:return std::unique_ptr<Packet>(new LoginStartPacket());
       default:return nullptr;
     }
-  } else if (status_ == ProtocolStatus::INGAME) {
+  } else if (status_ == ProtocolStatus::PLAY) {
     switch (id) {
       case 0x0F:return std::unique_ptr<Packet>(new ClientKeepAlivePacket());
       case 0x04:return std::unique_ptr<Packet>(new ClientStatusPacket());
@@ -67,7 +67,7 @@ std::unique_ptr<Packet> PacketFactory::createClientBoundPacket(int id) {
       case 0x03:return std::unique_ptr<Packet>(new SetCompressionPacket());
       default:return nullptr;
     }
-  } else if (status_ == ProtocolStatus::INGAME) {
+  } else if (status_ == ProtocolStatus::PLAY) {
     switch (id) {
       case 0x21:return std::unique_ptr<Packet>(new ServerKeepAlivePacket());
       case 0x22:return std::unique_ptr<Packet>(new ServerChunkDataPacket());

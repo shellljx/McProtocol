@@ -46,7 +46,11 @@ void Model::ParseModelFromJson(Model *model, Type type, const char *name) {
   if (modelJson.contains("textures")) {
     for (const auto &item : modelJson.at("textures").items()) {
       const auto &key = item.key();
-      auto value = item.value().get<std::string>();
+      std::string value = item.value().get<std::string>();
+      if (value.find('#') == std::string::npos && value.find("minecraft:") == std::string::npos) {
+        value = "minecraft:" + value;
+      }
+
       for (auto &element : model->elements_) {
         element->replaceTexture(key, value);
       }
